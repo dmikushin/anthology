@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui>
+  <menubar name='MainMenu'>
+    <menu name='File' action='FILE'>
+      <menuitem name='Open...' action='FILE_OPEN'/>
+      <menuitem name='Save Snapshot...' action='FILE_SAVESNAPSHOT'/>
+      <menu name='Recording' action='FILE_RECORDING'>
+        <menuitem name='Record...' action='FILE_RECORDING_RECORD'/>
+        <menuitem name='Record from snapshot...' action='FILE_RECORDING_RECORDFROMSNAPSHOT'/>
+        <menuitem name='Insert snapshot' action='FILE_RECORDING_INSERTSNAPSHOT'/>
+        <menuitem name='Rollback' action='FILE_RECORDING_ROLLBACK'/>
+        <menuitem name='Rollback to...' action='FILE_RECORDING_ROLLBACKTO'/>
+        <menuitem name='Play...' action='FILE_RECORDING_PLAY'/>
+        <menuitem name='Stop' action='FILE_RECORDING_STOP'/>
+      </menu>
+      <menu name='AY Logging' action='FILE_AYLOGGING'>
+        <menuitem name='Record...' action='FILE_AYLOGGING_RECORD'/>
+        <menuitem name='Stop' action='FILE_AYLOGGING_STOP'/>
+      </menu>
+      <separator/>
+      <menuitem name='Open SCR Screenshot...' action='FILE_OPENSCRSCREENSHOT'/>
+      <menuitem name='Save Screen as SCR...' action='FILE_SAVESCREENASSCR'/>
+      <menuitem name='Save Screen as PNG...' action='FILE_SAVESCREENASPNG'/>
+      <menu name='Movie' action='FILE_MOVIE'>
+        <menuitem name='Record...' action='FILE_MOVIE_RECORD'/>
+        <menuitem name='Record from RZX...' action='FILE_MOVIE_RECORDFROMRZX'/>
+        <menuitem name='Pause' action='FILE_MOVIE_PAUSE'/>
+        <menuitem name='Continue' action='FILE_MOVIE_CONTINUE'/>
+        <menuitem name='Stop' action='FILE_MOVIE_STOP'/>
+      </menu>
+      <separator/>
+      <menuitem name='Load binary data...' action='FILE_LOADBINARYDATA'/>
+      <menuitem name='Save binary data...' action='FILE_SAVEBINARYDATA'/>
+      <separator/>
+      <menuitem name='Exit...' action='FILE_EXIT'/>
+    </menu>
+    <menu name='Options' action='OPTIONS'>
+      <menuitem name='General...' action='OPTIONS_GENERAL'/>
+      <menuitem name='Sound...' action='OPTIONS_SOUND'/>
+      <menu name='Peripherals' action='OPTIONS_PERIPHERALS'>
+        <menuitem name='General...' action='OPTIONS_PERIPHERALS_GENERAL'/>
+        <menuitem name='Disk...' action='OPTIONS_PERIPHERALS_DISK'/>
+      </menu>
+      <menuitem name='RZX...' action='OPTIONS_RZX'/>
+      <menuitem name='Movie...' action='OPTIONS_MOVIE'/>
+      <menu name='Joysticks' action='OPTIONS_JOYSTICKS'>
+        <menuitem name='Joystick 1...' action='OPTIONS_JOYSTICKS_JOYSTICK1'/>
+        <menuitem name='Joystick 2...' action='OPTIONS_JOYSTICKS_JOYSTICK2'/>
+        <menuitem name='Keyboard...' action='OPTIONS_JOYSTICKS_KEYBOARD'/>
+      </menu>
+      <menu name='Select ROMs' action='OPTIONS_SELECTROMS'>
+        <menuitem name='Spectrum 16K...' action='OPTIONS_SELECTROMS_SPECTRUM16K'/>
+        <menuitem name='Spectrum 48K...' action='OPTIONS_SELECTROMS_SPECTRUM48K'/>
+        <menuitem name='Spectrum 128K...' action='OPTIONS_SELECTROMS_SPECTRUM128K'/>
+        <menuitem name='Spectrum +2...' action='OPTIONS_SELECTROMS_SPECTRUM2'/>
+        <menuitem name='Spectrum +2A...' action='OPTIONS_SELECTROMS_SPECTRUM2A'/>
+        <menuitem name='Spectrum +3...' action='OPTIONS_SELECTROMS_SPECTRUM3'/>
+        <menuitem name='Spectrum +3e...' action='OPTIONS_SELECTROMS_SPECTRUM3E'/>
+        <menuitem name='Timex TC2048...' action='OPTIONS_SELECTROMS_TIMEXTC2048'/>
+        <menuitem name='Timex TC2068...' action='OPTIONS_SELECTROMS_TIMEXTC2068'/>
+        <menuitem name='Timex TS2068...' action='OPTIONS_SELECTROMS_TIMEXTS2068'/>
+        <menuitem name='Pentagon 128K...' action='OPTIONS_SELECTROMS_PENTAGON128K'/>
+        <menuitem name='Pentagon 512K...' action='OPTIONS_SELECTROMS_PENTAGON512K'/>
+        <menuitem name='Pentagon 1024K...' action='OPTIONS_SELECTROMS_PENTAGON1024K'/>
+        <menuitem name='Scorpion ZS 256...' action='OPTIONS_SELECTROMS_SCORPIONZS256'/>
+        <menuitem name='Spectrum SE...' action='OPTIONS_SELECTROMS_SPECTRUMSE'/>
+        <menuitem name='Interface 1...' action='OPTIONS_SELECTROMS_INTERFACE1'/>
+        <menuitem name='Beta 128...' action='OPTIONS_SELECTROMS_BETA128'/>
+        <menuitem name='+D...' action='OPTIONS_SELECTROMS_D'/>
+        <menuitem name='DISCiPLE...' action='OPTIONS_SELECTROMS_DISCIPLE'/>
+        <menuitem name='Opus Discovery...' action='OPTIONS_SELECTROMS_OPUSDISCOVERY'/>
+        <menuitem name='SpeccyBoot...' action='OPTIONS_SELECTROMS_SPECCYBOOT'/>
+      </menu>
+      <menuitem name='Filter...' action='OPTIONS_FILTER'/>
+      <menuitem name='Disk options...' action='OPTIONS_DISKOPTIONS'/>
+      <separator/>
+      <menuitem name='Save' action='OPTIONS_SAVE'/>
+    </menu>
+    <menu name='Machine' action='MACHINE'>
+      <menuitem name='Pause...' action='MACHINE_PAUSE'/>
+      <menuitem name='Reset...' action='MACHINE_RESET'/>
+      <menuitem name='Hard reset...' action='MACHINE_HARDRESET'/>
+      <menuitem name='Select...' action='MACHINE_SELECT'/>
+      <menuitem name='Debugger...' action='MACHINE_DEBUGGER'/>
+      <menuitem name='Poke Finder...' action='MACHINE_POKEFINDER'/>
+      <menuitem name='Poke Memory...' action='MACHINE_POKEMEMORY'/>
+      <menuitem name='Memory Browser...' action='MACHINE_MEMORYBROWSER'/>
+      <menu name='Profiler' action='MACHINE_PROFILER'>
+        <menuitem name='Start' action='MACHINE_PROFILER_START'/>
+        <menuitem name='Stop' action='MACHINE_PROFILER_STOP'/>
+      </menu>
+      <menuitem name='NMI' action='MACHINE_NMI'/>
+    </menu>
+    <menu name='Media' action='MEDIA'>
+      <menu name='Tape' action='MEDIA_TAPE'>
+        <menuitem name='Open...' action='MEDIA_TAPE_OPEN'/>
+        <menuitem name='Play' action='MEDIA_TAPE_PLAY'/>
+        <menuitem name='Browse...' action='MEDIA_TAPE_BROWSE'/>
+        <menuitem name='Rewind' action='MEDIA_TAPE_REWIND'/>
+        <menuitem name='Clear' action='MEDIA_TAPE_CLEAR'/>
+        <menuitem name='Write...' action='MEDIA_TAPE_WRITE'/>
+        <menuitem name='Record Start' action='MEDIA_TAPE_RECORDSTART'/>
+        <menuitem name='Record Stop' action='MEDIA_TAPE_RECORDSTOP'/>
+      </menu>
+      <menu name='Interface 1' action='MEDIA_INTERFACE1'>
+        <menu name='Microdrive 1' action='MEDIA_INTERFACE1_MICRODRIVE1'>
+          <menuitem name='Insert New' action='MEDIA_INTERFACE1_MICRODRIVE1_INSERTNEW'/>
+          <menuitem name='Insert...' action='MEDIA_INTERFACE1_MICRODRIVE1_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_INTERFACE1_MICRODRIVE1_EJECT'/>
+          <menuitem name='Save' action='MEDIA_INTERFACE1_MICRODRIVE1_SAVE'/>
+          <menuitem name='Save As...' action='MEDIA_INTERFACE1_MICRODRIVE1_SAVEAS'/>
+          <menu name='Write protect' action='MEDIA_INTERFACE1_MICRODRIVE1_WRITEPROTECT'>
+            <menuitem name='Enable' action='MEDIA_INTERFACE1_MICRODRIVE1_WRITEPROTECT_ENABLE'/>
+            <menuitem name='Disable' action='MEDIA_INTERFACE1_MICRODRIVE1_WRITEPROTECT_DISABLE'/>
+          </menu>
+        </menu>
+        <menu name='Microdrive 2' action='MEDIA_INTERFACE1_MICRODRIVE2'>
+          <menuitem name='Insert New' action='MEDIA_INTERFACE1_MICRODRIVE2_INSERTNEW'/>
+          <menuitem name='Insert...' action='MEDIA_INTERFACE1_MICRODRIVE2_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_INTERFACE1_MICRODRIVE2_EJECT'/>
+          <menuitem name='Save' action='MEDIA_INTERFACE1_MICRODRIVE2_SAVE'/>
+          <menuitem name='Save As...' action='MEDIA_INTERFACE1_MICRODRIVE2_SAVEAS'/>
+          <menu name='Write protect' action='MEDIA_INTERFACE1_MICRODRIVE2_WRITEPROTECT'>
+            <menuitem name='Enable' action='MEDIA_INTERFACE1_MICRODRIVE2_WRITEPROTECT_ENABLE'/>
+            <menuitem name='Disable' action='MEDIA_INTERFACE1_MICRODRIVE2_WRITEPROTECT_DISABLE'/>
+          </menu>
+        </menu>
+        <menu name='Microdrive 3' action='MEDIA_INTERFACE1_MICRODRIVE3'>
+          <menuitem name='Insert New' action='MEDIA_INTERFACE1_MICRODRIVE3_INSERTNEW'/>
+          <menuitem name='Insert...' action='MEDIA_INTERFACE1_MICRODRIVE3_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_INTERFACE1_MICRODRIVE3_EJECT'/>
+          <menuitem name='Save' action='MEDIA_INTERFACE1_MICRODRIVE3_SAVE'/>
+          <menuitem name='Save As...' action='MEDIA_INTERFACE1_MICRODRIVE3_SAVEAS'/>
+          <menu name='Write protect' action='MEDIA_INTERFACE1_MICRODRIVE3_WRITEPROTECT'>
+            <menuitem name='Enable' action='MEDIA_INTERFACE1_MICRODRIVE3_WRITEPROTECT_ENABLE'/>
+            <menuitem name='Disable' action='MEDIA_INTERFACE1_MICRODRIVE3_WRITEPROTECT_DISABLE'/>
+          </menu>
+        </menu>
+        <menu name='Microdrive 4' action='MEDIA_INTERFACE1_MICRODRIVE4'>
+          <menuitem name='Insert New' action='MEDIA_INTERFACE1_MICRODRIVE4_INSERTNEW'/>
+          <menuitem name='Insert...' action='MEDIA_INTERFACE1_MICRODRIVE4_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_INTERFACE1_MICRODRIVE4_EJECT'/>
+          <menuitem name='Save' action='MEDIA_INTERFACE1_MICRODRIVE4_SAVE'/>
+          <menuitem name='Save As...' action='MEDIA_INTERFACE1_MICRODRIVE4_SAVEAS'/>
+          <menu name='Write protect' action='MEDIA_INTERFACE1_MICRODRIVE4_WRITEPROTECT'>
+            <menuitem name='Enable' action='MEDIA_INTERFACE1_MICRODRIVE4_WRITEPROTECT_ENABLE'/>
+            <menuitem name='Disable' action='MEDIA_INTERFACE1_MICRODRIVE4_WRITEPROTECT_DISABLE'/>
+          </menu>
+        </menu>
+        <menu name='Microdrive 5' action='MEDIA_INTERFACE1_MICRODRIVE5'>
+          <menuitem name='Insert New' action='MEDIA_INTERFACE1_MICRODRIVE5_INSERTNEW'/>
+          <menuitem name='Insert...' action='MEDIA_INTERFACE1_MICRODRIVE5_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_INTERFACE1_MICRODRIVE5_EJECT'/>
+          <menuitem name='Save' action='MEDIA_INTERFACE1_MICRODRIVE5_SAVE'/>
+          <menuitem name='Save As...' action='MEDIA_INTERFACE1_MICRODRIVE5_SAVEAS'/>
+          <menu name='Write protect' action='MEDIA_INTERFACE1_MICRODRIVE5_WRITEPROTECT'>
+            <menuitem name='Enable' action='MEDIA_INTERFACE1_MICRODRIVE5_WRITEPROTECT_ENABLE'/>
+            <menuitem name='Disable' action='MEDIA_INTERFACE1_MICRODRIVE5_WRITEPROTECT_DISABLE'/>
+          </menu>
+        </menu>
+        <menu name='Microdrive 6' action='MEDIA_INTERFACE1_MICRODRIVE6'>
+          <menuitem name='Insert New' action='MEDIA_INTERFACE1_MICRODRIVE6_INSERTNEW'/>
+          <menuitem name='Insert...' action='MEDIA_INTERFACE1_MICRODRIVE6_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_INTERFACE1_MICRODRIVE6_EJECT'/>
+          <menuitem name='Save' action='MEDIA_INTERFACE1_MICRODRIVE6_SAVE'/>
+          <menuitem name='Save As...' action='MEDIA_INTERFACE1_MICRODRIVE6_SAVEAS'/>
+          <menu name='Write protect' action='MEDIA_INTERFACE1_MICRODRIVE6_WRITEPROTECT'>
+            <menuitem name='Enable' action='MEDIA_INTERFACE1_MICRODRIVE6_WRITEPROTECT_ENABLE'/>
+            <menuitem name='Disable' action='MEDIA_INTERFACE1_MICRODRIVE6_WRITEPROTECT_DISABLE'/>
+          </menu>
+        </menu>
+        <menu name='Microdrive 7' action='MEDIA_INTERFACE1_MICRODRIVE7'>
+          <menuitem name='Insert New' action='MEDIA_INTERFACE1_MICRODRIVE7_INSERTNEW'/>
+          <menuitem name='Insert...' action='MEDIA_INTERFACE1_MICRODRIVE7_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_INTERFACE1_MICRODRIVE7_EJECT'/>
+          <menuitem name='Save' action='MEDIA_INTERFACE1_MICRODRIVE7_SAVE'/>
+          <menuitem name='Save As...' action='MEDIA_INTERFACE1_MICRODRIVE7_SAVEAS'/>
+          <menu name='Write protect' action='MEDIA_INTERFACE1_MICRODRIVE7_WRITEPROTECT'>
+            <menuitem name='Enable' action='MEDIA_INTERFACE1_MICRODRIVE7_WRITEPROTECT_ENABLE'/>
+            <menuitem name='Disable' action='MEDIA_INTERFACE1_MICRODRIVE7_WRITEPROTECT_DISABLE'/>
+          </menu>
+        </menu>
+        <menu name='Microdrive 8' action='MEDIA_INTERFACE1_MICRODRIVE8'>
+          <menuitem name='Insert New' action='MEDIA_INTERFACE1_MICRODRIVE8_INSERTNEW'/>
+          <menuitem name='Insert...' action='MEDIA_INTERFACE1_MICRODRIVE8_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_INTERFACE1_MICRODRIVE8_EJECT'/>
+          <menuitem name='Save' action='MEDIA_INTERFACE1_MICRODRIVE8_SAVE'/>
+          <menuitem name='Save As...' action='MEDIA_INTERFACE1_MICRODRIVE8_SAVEAS'/>
+          <menu name='Write protect' action='MEDIA_INTERFACE1_MICRODRIVE8_WRITEPROTECT'>
+            <menuitem name='Enable' action='MEDIA_INTERFACE1_MICRODRIVE8_WRITEPROTECT_ENABLE'/>
+            <menuitem name='Disable' action='MEDIA_INTERFACE1_MICRODRIVE8_WRITEPROTECT_DISABLE'/>
+          </menu>
+        </menu>
+        <menu name='RS232' action='MEDIA_INTERFACE1_RS232'>
+          <menuitem name='Plug RxD' action='MEDIA_INTERFACE1_RS232_PLUGRXD'/>
+          <menuitem name='Unplug RxD' action='MEDIA_INTERFACE1_RS232_UNPLUGRXD'/>
+          <menuitem name='Plug TxD' action='MEDIA_INTERFACE1_RS232_PLUGTXD'/>
+          <menuitem name='Unplug TxD' action='MEDIA_INTERFACE1_RS232_UNPLUGTXD'/>
+        </menu>
+      </menu>
+      <menu name='Disk' action='MEDIA_DISK'>
+        <menu name='+3' action='MEDIA_DISK_3'>
+          <menu name='Drive A:' action='MEDIA_DISK_3_DRIVEA'>
+            <menuitem name='Insert New' action='MEDIA_DISK_3_DRIVEA_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_3_DRIVEA_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_3_DRIVEA_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_3_DRIVEA_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_3_DRIVEA_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_3_DRIVEA_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_3_DRIVEA_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_3_DRIVEA_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_3_DRIVEA_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_3_DRIVEA_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_3_DRIVEA_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+          <menu name='Drive B:' action='MEDIA_DISK_3_DRIVEB'>
+            <menuitem name='Insert New' action='MEDIA_DISK_3_DRIVEB_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_3_DRIVEB_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_3_DRIVEB_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_3_DRIVEB_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_3_DRIVEB_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_3_DRIVEB_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_3_DRIVEB_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_3_DRIVEB_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_3_DRIVEB_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_3_DRIVEB_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_3_DRIVEB_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+        </menu>
+        <menu name='Beta' action='MEDIA_DISK_BETA'>
+          <menu name='Drive A:' action='MEDIA_DISK_BETA_DRIVEA'>
+            <menuitem name='Insert New' action='MEDIA_DISK_BETA_DRIVEA_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_BETA_DRIVEA_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_BETA_DRIVEA_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_BETA_DRIVEA_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_BETA_DRIVEA_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_BETA_DRIVEA_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_BETA_DRIVEA_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_BETA_DRIVEA_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_BETA_DRIVEA_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_BETA_DRIVEA_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_BETA_DRIVEA_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+          <menu name='Drive B:' action='MEDIA_DISK_BETA_DRIVEB'>
+            <menuitem name='Insert New' action='MEDIA_DISK_BETA_DRIVEB_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_BETA_DRIVEB_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_BETA_DRIVEB_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_BETA_DRIVEB_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_BETA_DRIVEB_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_BETA_DRIVEB_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_BETA_DRIVEB_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_BETA_DRIVEB_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_BETA_DRIVEB_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_BETA_DRIVEB_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_BETA_DRIVEB_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+          <menu name='Drive C:' action='MEDIA_DISK_BETA_DRIVEC'>
+            <menuitem name='Insert New' action='MEDIA_DISK_BETA_DRIVEC_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_BETA_DRIVEC_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_BETA_DRIVEC_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_BETA_DRIVEC_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_BETA_DRIVEC_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_BETA_DRIVEC_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_BETA_DRIVEC_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_BETA_DRIVEC_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_BETA_DRIVEC_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_BETA_DRIVEC_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_BETA_DRIVEC_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+          <menu name='Drive D:' action='MEDIA_DISK_BETA_DRIVED'>
+            <menuitem name='Insert New' action='MEDIA_DISK_BETA_DRIVED_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_BETA_DRIVED_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_BETA_DRIVED_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_BETA_DRIVED_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_BETA_DRIVED_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_BETA_DRIVED_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_BETA_DRIVED_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_BETA_DRIVED_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_BETA_DRIVED_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_BETA_DRIVED_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_BETA_DRIVED_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+        </menu>
+        <menu name='+D' action='MEDIA_DISK_D'>
+          <menu name='Drive 1' action='MEDIA_DISK_D_DRIVE1'>
+            <menuitem name='Insert New' action='MEDIA_DISK_D_DRIVE1_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_D_DRIVE1_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_D_DRIVE1_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_D_DRIVE1_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_D_DRIVE1_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_D_DRIVE1_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_D_DRIVE1_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_D_DRIVE1_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_D_DRIVE1_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_D_DRIVE1_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_D_DRIVE1_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+          <menu name='Drive 2' action='MEDIA_DISK_D_DRIVE2'>
+            <menuitem name='Insert New' action='MEDIA_DISK_D_DRIVE2_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_D_DRIVE2_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_D_DRIVE2_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_D_DRIVE2_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_D_DRIVE2_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_D_DRIVE2_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_D_DRIVE2_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_D_DRIVE2_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_D_DRIVE2_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_D_DRIVE2_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_D_DRIVE2_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+        </menu>
+        <menu name='DISCiPLE' action='MEDIA_DISK_DISCIPLE'>
+          <menu name='Drive 1' action='MEDIA_DISK_DISCIPLE_DRIVE1'>
+            <menuitem name='Insert New' action='MEDIA_DISK_DISCIPLE_DRIVE1_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_DISCIPLE_DRIVE1_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_DISCIPLE_DRIVE1_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_DISCIPLE_DRIVE1_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_DISCIPLE_DRIVE1_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_DISCIPLE_DRIVE1_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_DISCIPLE_DRIVE1_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_DISCIPLE_DRIVE1_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_DISCIPLE_DRIVE1_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_DISCIPLE_DRIVE1_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_DISCIPLE_DRIVE1_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+          <menu name='Drive 2' action='MEDIA_DISK_DISCIPLE_DRIVE2'>
+            <menuitem name='Insert New' action='MEDIA_DISK_DISCIPLE_DRIVE2_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_DISCIPLE_DRIVE2_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_DISCIPLE_DRIVE2_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_DISCIPLE_DRIVE2_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_DISCIPLE_DRIVE2_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_DISCIPLE_DRIVE2_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_DISCIPLE_DRIVE2_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_DISCIPLE_DRIVE2_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_DISCIPLE_DRIVE2_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_DISCIPLE_DRIVE2_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_DISCIPLE_DRIVE2_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+        </menu>
+        <menu name='Opus' action='MEDIA_DISK_OPUS'>
+          <menu name='Drive 1' action='MEDIA_DISK_OPUS_DRIVE1'>
+            <menuitem name='Insert New' action='MEDIA_DISK_OPUS_DRIVE1_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_OPUS_DRIVE1_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_OPUS_DRIVE1_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_OPUS_DRIVE1_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_OPUS_DRIVE1_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_OPUS_DRIVE1_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_OPUS_DRIVE1_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_OPUS_DRIVE1_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_OPUS_DRIVE1_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_OPUS_DRIVE1_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_OPUS_DRIVE1_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+          <menu name='Drive 2' action='MEDIA_DISK_OPUS_DRIVE2'>
+            <menuitem name='Insert New' action='MEDIA_DISK_OPUS_DRIVE2_INSERTNEW'/>
+            <menuitem name='Insert...' action='MEDIA_DISK_OPUS_DRIVE2_INSERT'/>
+            <menuitem name='Eject' action='MEDIA_DISK_OPUS_DRIVE2_EJECT'/>
+            <menuitem name='Save' action='MEDIA_DISK_OPUS_DRIVE2_SAVE'/>
+            <menuitem name='Save As...' action='MEDIA_DISK_OPUS_DRIVE2_SAVEAS'/>
+            <menu name='Flip disk' action='MEDIA_DISK_OPUS_DRIVE2_FLIPDISK'>
+              <menuitem name='Turn upside down' action='MEDIA_DISK_OPUS_DRIVE2_FLIPDISK_TURNUPSIDEDOWN'/>
+              <menuitem name='Turn back' action='MEDIA_DISK_OPUS_DRIVE2_FLIPDISK_TURNBACK'/>
+            </menu>
+            <menu name='Write protect' action='MEDIA_DISK_OPUS_DRIVE2_WRITEPROTECT'>
+              <menuitem name='Enable' action='MEDIA_DISK_OPUS_DRIVE2_WRITEPROTECT_ENABLE'/>
+              <menuitem name='Disable' action='MEDIA_DISK_OPUS_DRIVE2_WRITEPROTECT_DISABLE'/>
+            </menu>
+          </menu>
+        </menu>
+      </menu>
+      <menu name='Cartridge' action='MEDIA_CARTRIDGE'>
+        <menu name='Timex Dock' action='MEDIA_CARTRIDGE_TIMEXDOCK'>
+          <menuitem name='Insert...' action='MEDIA_CARTRIDGE_TIMEXDOCK_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_CARTRIDGE_TIMEXDOCK_EJECT'/>
+        </menu>
+        <menu name='Interface 2' action='MEDIA_CARTRIDGE_INTERFACE2'>
+          <menuitem name='Insert...' action='MEDIA_CARTRIDGE_INTERFACE2_INSERT'/>
+          <menuitem name='Eject' action='MEDIA_CARTRIDGE_INTERFACE2_EJECT'/>
+        </menu>
+      </menu>
+      <menu name='IDE' action='MEDIA_IDE'>
+        <menu name='Simple 8-bit' action='MEDIA_IDE_SIMPLE8BIT'>
+          <menu name='Master' action='MEDIA_IDE_SIMPLE8BIT_MASTER'>
+            <menuitem name='Insert...' action='MEDIA_IDE_SIMPLE8BIT_MASTER_INSERT'/>
+            <menuitem name='Commit' action='MEDIA_IDE_SIMPLE8BIT_MASTER_COMMIT'/>
+            <menuitem name='Eject' action='MEDIA_IDE_SIMPLE8BIT_MASTER_EJECT'/>
+          </menu>
+          <menu name='Slave' action='MEDIA_IDE_SIMPLE8BIT_SLAVE'>
+            <menuitem name='Insert...' action='MEDIA_IDE_SIMPLE8BIT_SLAVE_INSERT'/>
+            <menuitem name='Commit' action='MEDIA_IDE_SIMPLE8BIT_SLAVE_COMMIT'/>
+            <menuitem name='Eject' action='MEDIA_IDE_SIMPLE8BIT_SLAVE_EJECT'/>
+          </menu>
+        </menu>
+        <menu name='ZXATASP' action='MEDIA_IDE_ZXATASP'>
+          <menu name='Master' action='MEDIA_IDE_ZXATASP_MASTER'>
+            <menuitem name='Insert...' action='MEDIA_IDE_ZXATASP_MASTER_INSERT'/>
+            <menuitem name='Commit' action='MEDIA_IDE_ZXATASP_MASTER_COMMIT'/>
+            <menuitem name='Eject' action='MEDIA_IDE_ZXATASP_MASTER_EJECT'/>
+          </menu>
+          <menu name='Slave' action='MEDIA_IDE_ZXATASP_SLAVE'>
+            <menuitem name='Insert...' action='MEDIA_IDE_ZXATASP_SLAVE_INSERT'/>
+            <menuitem name='Commit' action='MEDIA_IDE_ZXATASP_SLAVE_COMMIT'/>
+            <menuitem name='Eject' action='MEDIA_IDE_ZXATASP_SLAVE_EJECT'/>
+          </menu>
+        </menu>
+        <menu name='ZXCF CompactFlash' action='MEDIA_IDE_ZXCFCOMPACTFLASH'>
+          <menuitem name='Insert...' action='MEDIA_IDE_ZXCFCOMPACTFLASH_INSERT'/>
+          <menuitem name='Commit' action='MEDIA_IDE_ZXCFCOMPACTFLASH_COMMIT'/>
+          <menuitem name='Eject' action='MEDIA_IDE_ZXCFCOMPACTFLASH_EJECT'/>
+        </menu>
+        <menu name='DivIDE' action='MEDIA_IDE_DIVIDE'>
+          <menu name='Master' action='MEDIA_IDE_DIVIDE_MASTER'>
+            <menuitem name='Insert...' action='MEDIA_IDE_DIVIDE_MASTER_INSERT'/>
+            <menuitem name='Commit' action='MEDIA_IDE_DIVIDE_MASTER_COMMIT'/>
+            <menuitem name='Eject' action='MEDIA_IDE_DIVIDE_MASTER_EJECT'/>
+          </menu>
+          <menu name='Slave' action='MEDIA_IDE_DIVIDE_SLAVE'>
+            <menuitem name='Insert...' action='MEDIA_IDE_DIVIDE_SLAVE_INSERT'/>
+            <menuitem name='Commit' action='MEDIA_IDE_DIVIDE_SLAVE_COMMIT'/>
+            <menuitem name='Eject' action='MEDIA_IDE_DIVIDE_SLAVE_EJECT'/>
+          </menu>
+        </menu>
+      </menu>
+    </menu>
+    <menu name='Help' action='HELP'>
+      <menuitem name='Keyboard...' action='HELP_KEYBOARD'/>
+      <menuitem name='About...' action='HELP_ABOUT'/>
+    </menu>
+  </menubar>
+</ui>
