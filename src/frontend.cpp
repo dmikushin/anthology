@@ -274,7 +274,6 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer use
 			break;
 		case GDK_KEY_Escape :
 			fuse_exiting = 1;
-			gtk_main_quit();
 		}
 	}
 	else
