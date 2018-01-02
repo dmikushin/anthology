@@ -167,7 +167,7 @@ ui_statusbar_update( ui_statusbar_item item, ui_statusbar_state state )
   case UI_STATUSBAR_ITEM_PAUSED:
     which = ( state == UI_STATUSBAR_STATE_ACTIVE ?
               pixbuf_pause_active : pixbuf_pause_inactive );
-    gtk_image_set_from_pixbuf( GTK_IMAGE( pause_status ), which );
+    //gtk_image_set_from_pixbuf( GTK_IMAGE( pause_status ), which );
     return 0;
 
   case UI_STATUSBAR_ITEM_MICRODRIVE:
@@ -190,7 +190,7 @@ ui_statusbar_update( ui_statusbar_item item, ui_statusbar_state state )
   case UI_STATUSBAR_ITEM_TAPE:
     which = ( state == UI_STATUSBAR_STATE_ACTIVE ?
               pixbuf_tape_active : pixbuf_tape_inactive );
-    gtk_image_set_from_pixbuf( GTK_IMAGE( tape_status ), which );
+    /*gtk_image_set_from_pixbuf( GTK_IMAGE( tape_status ), which );*/
 
     return 0;
 
