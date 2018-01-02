@@ -25,6 +25,16 @@
 
 */
 
+struct Keymap
+{
+	uint32_t joystick_key;
+	uint32_t native_key;
+};
+
+extern struct Keymap joystick[3][127];
+
+extern int selected_game;
+
 #include <config.h>
 
 #if !defined USE_JOYSTICK || defined HAVE_JSW_H
@@ -103,6 +113,42 @@ ui_joystick_init( void )
   return retval;
 }
 
+extern int is_game_active, stop_event;
+
+static void
+button_action( SDL_JoyButtonEvent *buttonevent, input_event_type type )
+{
+	input_event_t fuse_event;
+	fuse_event.type = type;
+	input_key joystick_key = buttonevent->button;
+	for (int i = 0; i < 127; i++)
+	{
+		if (joystick[selected_game][i].joystick_key == joystick_key)
+		{
+			input_key native_key = joystick[selected_game][i].native_key;
+
+			if (native_key == INPUT_KEY_Escape)
+			{
+				// Ignore joystick
+				SDL_JoystickEventState( SDL_IGNORE );
+
+				is_game_active = FALSE;
+				stop_event = -1;
+				gtk_widget_queue_draw(gtkui_window);
+				
+				break;
+			}
+
+			fuse_event.types.key.native_key = native_key;
+			fuse_event.types.key.spectrum_key = native_key;
+
+			input_event( &fuse_event );
+			
+			break;
+		}
+	}
+}
+
 void
 ui_joystick_poll( void )
 {
@@ -115,13 +161,13 @@ ui_joystick_poll( void )
   while( SDL_PollEvent( &event ) ) {
     switch( event.type ) {
     case SDL_JOYBUTTONDOWN:
-      sdljoystick_buttonpress( &(event.jbutton) );
+      button_action(&(event.jbutton), INPUT_EVENT_KEYPRESS);
       break;
     case SDL_JOYBUTTONUP:
-      sdljoystick_buttonrelease( &(event.jbutton) );
+      button_action(&(event.jbutton), INPUT_EVENT_KEYRELEASE);
       break;
     case SDL_JOYAXISMOTION:
-      sdljoystick_axismove( &(event.jaxis) );
+      sdljoystick_axismove(&(event.jaxis));
       break;
     default:
       break;
@@ -129,34 +175,6 @@ ui_joystick_poll( void )
   }
 #endif
 
-}
-
-static void
-button_action( SDL_JoyButtonEvent *buttonevent, input_event_type type )
-{
-  int button;
-  input_event_t event;
-  
-  button = buttonevent->button;
-  if( button > 14 ) return;	/* We support 'only' 15 fire buttons */
-
-  event.type = type;
-  event.types.joystick.which = buttonevent->which;
-  event.types.joystick.button = INPUT_JOYSTICK_FIRE_1 + button;
-
-  input_event( &event );
-}
-
-void
-sdljoystick_buttonpress( SDL_JoyButtonEvent *buttonevent )
-{
-  button_action( buttonevent, INPUT_EVENT_JOYSTICK_PRESS );
-}
-
-void
-sdljoystick_buttonrelease( SDL_JoyButtonEvent *buttonevent )
-{
-  button_action( buttonevent, INPUT_EVENT_JOYSTICK_RELEASE );
 }
 
 void
@@ -171,29 +189,53 @@ sdljoystick_axismove( SDL_JoyAxisEvent *axisevent )
   }
 }
 
+static int map_key(input_key joystick_key, input_key* native_key)
+{
+	for (int i = 0; i < 127; i++)
+		if (joystick[selected_game][i].joystick_key == joystick_key)
+		{
+			*native_key = joystick[selected_game][i].native_key;
+			return 0;
+		}
+	
+	return 1;
+}
+
 static void
 do_axis( int which, Sint16 value, input_key negative, input_key positive )
 {
-  input_event_t event1, event2;
+	input_event_t fuse_event;
+	input_key native_key;
 
-  event1.types.joystick.which = event2.types.joystick.which = which;
-
-  event1.types.joystick.button = negative;
-  event2.types.joystick.button = positive;
-
-  if( value > 16384 ) {
-    event1.type = INPUT_EVENT_JOYSTICK_RELEASE;
-    event2.type = INPUT_EVENT_JOYSTICK_PRESS;
-  } else if( value < -16384 ) {
-    event1.type = INPUT_EVENT_JOYSTICK_PRESS;
-    event2.type = INPUT_EVENT_JOYSTICK_RELEASE;
-  } else {
-    event1.type = INPUT_EVENT_JOYSTICK_RELEASE;
-    event2.type = INPUT_EVENT_JOYSTICK_RELEASE;
-  }
-
-  input_event( &event1 );
-  input_event( &event2 );
+	if (value == 0)
+	{
+		// Release both buttons, i.e. both joystick axis directions
+		fuse_event.type = INPUT_EVENT_KEYRELEASE;
+		if (map_key(negative, &native_key) == 0)
+		{
+			fuse_event.types.key.native_key = native_key;
+			fuse_event.types.key.spectrum_key = native_key;
+			input_event(&fuse_event);
+		}
+		if (map_key(positive, &native_key) == 0)
+		{
+			fuse_event.types.key.native_key = native_key;
+			fuse_event.types.key.spectrum_key = native_key;
+			input_event(&fuse_event);
+		}
+	}
+	else
+	{
+		// Press button corresponding to either negative or positive joystick
+		// axis direction
+		fuse_event.type = INPUT_EVENT_KEYPRESS;
+		if (map_key((value < 0) ? negative : positive, &native_key) == 0)
+		{
+			fuse_event.types.key.native_key = native_key;
+			fuse_event.types.key.spectrum_key = native_key;
+			input_event(&fuse_event);
+		}
+	}
 }
 
 void

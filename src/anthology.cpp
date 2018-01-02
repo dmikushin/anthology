@@ -3,19 +3,20 @@
 #include <allegro5/allegro_acodec.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#include <input.h>
 #include <libspectrum.h>
 #include <memory>
+#include <SDL.h>
 #include <vector>
 
 extern "C"
 {
 	GtkWidget *gtkui_drawing_area = NULL;
+	int selected_game = 0;
+	int is_game_active = FALSE;
 }
 
 using namespace std;
-
-static int selected_game = 0;
-static gboolean is_game_active = FALSE;
 
 class Music
 {
@@ -224,7 +225,7 @@ class ZX80
 	GtkWidget** gtkui_drawing_area;
 
 	static const char* games[3];
-	
+
 	vector<uint32_t> pixels;
 	int stride;
 	
@@ -333,6 +334,56 @@ const char* ZX80::games[3] =
 	"games/pool/pool.tzx"
 };
 
+struct Keymap
+{
+	uint32_t joystick_key;
+	uint32_t native_key;
+};
+
+extern "C"
+{
+	Keymap joystick[4][127] =
+	{
+		{
+			{ INPUT_JOYSTICK_LEFT, INPUT_KEY_o },
+			{ INPUT_JOYSTICK_RIGHT, INPUT_KEY_p },
+			{ 0, INPUT_KEY_m },
+			{ 0, INPUT_KEY_Return },
+			{ INPUT_JOYSTICK_DOWN, INPUT_KEY_a },
+			{ INPUT_JOYSTICK_UP, INPUT_KEY_q },
+			{ 3, INPUT_KEY_s },
+			{ 8, INPUT_KEY_Escape },
+		},
+		{
+			{ INPUT_JOYSTICK_LEFT, INPUT_KEY_1 },
+			{ INPUT_JOYSTICK_RIGHT, INPUT_KEY_0 },
+			{ 0, INPUT_KEY_minus },
+			{ INPUT_JOYSTICK_DOWN, INPUT_KEY_8 },
+			{ INPUT_JOYSTICK_UP, INPUT_KEY_9 },
+			{ 3, INPUT_KEY_1 },
+			{ 8, INPUT_KEY_Escape },
+		},
+		{
+			{ INPUT_JOYSTICK_LEFT, INPUT_KEY_a },
+			{ INPUT_JOYSTICK_RIGHT, INPUT_KEY_s },
+			{ INPUT_JOYSTICK_DOWN, INPUT_KEY_s },
+			{ INPUT_JOYSTICK_UP, INPUT_KEY_a },
+			{ 0, INPUT_KEY_Return },
+			{ 3, INPUT_KEY_1 },
+			{ 1, INPUT_KEY_2 },
+			{ 2, INPUT_KEY_l },
+			{ 8, INPUT_KEY_Escape },
+		},
+		// Keys for main menu screen
+		{
+			{ 0, INPUT_KEY_Return },
+			{ 2 /* INPUT_JOYSTICK_LEFT */, INPUT_KEY_Left },
+			{ 1 /* INPUT_JOYSTICK_RIGHT */, INPUT_KEY_Right },
+			{ 8, INPUT_KEY_Escape },
+		},
+	};
+}
+
 const guchar ZX80::rgbColors[16][3] =
 {
 	{   0,   0,   0 },
@@ -430,6 +481,67 @@ extern "C"
 	GtkWidget *gtkui_window = NULL;
 }
 
+static void joystick_button_action(SDL_JoyButtonEvent *buttonevent, input_event_type type)
+{
+	int menu_keys_index = sizeof(joystick) / sizeof(joystick[0]) - 1;
+
+	input_key joystick_key = (input_key)buttonevent->button;
+	for (int i = 0; i < 127; i++)
+	{
+		if (joystick[menu_keys_index][i].joystick_key == joystick_key)
+		{
+			input_key native_key = (input_key)joystick[menu_keys_index][i].native_key;
+
+			if (native_key == INPUT_KEY_Left)
+			{
+				selected_game = MAX(0, selected_game - 1);
+				gtk_widget_queue_draw(gtkui_window);
+				break;
+			}
+			else if (native_key == INPUT_KEY_Right)
+			{
+				selected_game = MIN(2, selected_game + 1);
+				gtk_widget_queue_draw(gtkui_window);
+				break;
+			}
+			else if (native_key == INPUT_KEY_Return)
+			{
+				is_game_active = TRUE;
+				gtk_widget_queue_draw(gtkui_window);
+				break;
+			}
+			else if (native_key == INPUT_KEY_Escape)
+			{
+				fuse_exiting = 1;
+				break;
+			}
+		}
+	}
+}
+
+static void ui_joystick_poll()
+{
+	SDL_Event event;
+
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+		case SDL_JOYBUTTONDOWN:
+			joystick_button_action(&(event.jbutton), INPUT_EVENT_KEYPRESS);
+			break;
+		case SDL_JOYBUTTONUP:
+//			joystick_button_action(&(event.jbutton), INPUT_EVENT_KEYRELEASE);
+			break;
+		case SDL_JOYAXISMOTION:
+			//sdljoystick_axismove(&(event.jaxis));
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 extern "C" int ui_init(int *argc, char ***argv)
 {
 	/* This is called in all GTK applications. Arguments are parsed
@@ -460,9 +572,15 @@ extern "C" int ui_init(int *argc, char ***argv)
 			z80_do_opcodes();
 			event_do_events();
 		}
+		else
+		{
+			ui_joystick_poll();
+		}
 
 		while (gtk_events_pending() && !fuse_exiting)
+		{
 			gtk_main_iteration();
+		}
 	}	
 	
 	return 0;
