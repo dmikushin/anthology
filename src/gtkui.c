@@ -57,10 +57,10 @@
 #include "utils.h"
 
 /* The main Fuse window */
-GtkWidget *gtkui_window;
+extern GtkWidget *gtkui_window;
 
 /* The area into which the screen will be drawn */
-GtkWidget *gtkui_drawing_area;
+extern GtkWidget *gtkui_drawing_area;
 
 /* The UIManager used to create the menu bar */
 GtkUIManager *ui_manager_menu = NULL;
@@ -145,99 +145,9 @@ static void gtkui_drag_data_received( GtkWidget *widget GCC_UNUSED,
   gtk_drag_finish( drag_context, FALSE, FALSE, timestamp );
 }
 
-int
-ui_init( int *argc, char ***argv )
-{
-  GtkWidget *box, *menu_bar;
-  GtkAccelGroup *accel_group;
-  GtkSettings *settings;
+#include "tape.h"
 
-  gtk_init(argc,argv);
-
-#if !GTK_CHECK_VERSION( 3, 0, 0 )
-  gdk_rgb_init();
-  gdk_rgb_set_install( TRUE );
-  gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
-  gtk_widget_set_default_visual( gdk_rgb_get_visual() );
-#endif                /* #if !GTK_CHECK_VERSION( 3, 0, 0 ) */
-
-  gtkui_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-  settings = gtk_widget_get_settings( GTK_WIDGET( gtkui_window ) );
-  g_object_set( settings, "gtk-menu-bar-accel", "F1", NULL );
-  gtk_window_set_title( GTK_WINDOW(gtkui_window), "Fuse" );
-  gtk_window_set_wmclass( GTK_WINDOW(gtkui_window), fuse_progname, "Fuse" );
-
-  g_signal_connect(G_OBJECT(gtkui_window), "delete-event",
-		   G_CALLBACK(gtkui_delete), NULL);
-  g_signal_connect(G_OBJECT(gtkui_window), "key-press-event",
-		   G_CALLBACK(gtkkeyboard_keypress), NULL);
-  gtk_widget_add_events( gtkui_window, GDK_KEY_RELEASE_MASK );
-  g_signal_connect(G_OBJECT(gtkui_window), "key-release-event",
-		   G_CALLBACK(gtkkeyboard_keyrelease), NULL);
-
-  /* If we lose the focus, disable all keys */
-  g_signal_connect( G_OBJECT( gtkui_window ), "focus-out-event",
-		    G_CALLBACK( gtkui_lose_focus ), NULL );
-  g_signal_connect( G_OBJECT( gtkui_window ), "focus-in-event",
-		    G_CALLBACK( gtkui_gain_focus ), NULL );
-
-  gtk_drag_dest_set( GTK_WIDGET( gtkui_window ),
-                     GTK_DEST_DEFAULT_ALL,
-                     drag_types,
-                     G_N_ELEMENTS( drag_types ),
-                     GDK_ACTION_COPY | GDK_ACTION_PRIVATE | GDK_ACTION_MOVE );
-                     /* GDK_ACTION_PRIVATE alone DNW with ROX-Filer,
-                        GDK_ACTION_MOVE allow DnD from KDE */
-
-  g_signal_connect( G_OBJECT( gtkui_window ), "drag-data-received",
-		    G_CALLBACK( gtkui_drag_data_received ), NULL );
-
-  box = gtk_box_new( GTK_ORIENTATION_VERTICAL, 0 );
-  gtk_container_add(GTK_CONTAINER(gtkui_window), box);
-
-  if( gtkui_make_menu( &accel_group, &menu_bar, gtkui_menu_data,
-                       gtkui_menu_data_size ) ) {
-    fprintf(stderr,"%s: couldn't make menus %s:%d\n",
-	    fuse_progname,__FILE__,__LINE__);
-    return 1;
-  }
-
-  gtk_window_add_accel_group( GTK_WINDOW(gtkui_window), accel_group );
-  gtk_box_pack_start( GTK_BOX(box), menu_bar, FALSE, FALSE, 0 );
-
-  gtkui_drawing_area = gtk_drawing_area_new();
-  if(!gtkui_drawing_area) {
-    fprintf(stderr,"%s: couldn't create drawing area at %s:%d\n",
-	    fuse_progname,__FILE__,__LINE__);
-    return 1;
-  }
-
-  /* Set minimum size for drawing area */
-  gtk_widget_set_size_request( gtkui_drawing_area, DISPLAY_ASPECT_WIDTH,
-                               DISPLAY_SCREEN_HEIGHT );
-
-  gtk_widget_add_events( GTK_WIDGET( gtkui_drawing_area ),
-    GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK );
-  g_signal_connect( G_OBJECT( gtkui_drawing_area ), "motion-notify-event",
-		    G_CALLBACK( gtkmouse_position ), NULL );
-  g_signal_connect( G_OBJECT( gtkui_drawing_area ), "button-press-event",
-		    G_CALLBACK( gtkmouse_button ), NULL );
-  g_signal_connect( G_OBJECT( gtkui_drawing_area ), "button-release-event",
-		    G_CALLBACK( gtkmouse_button ), NULL );
-
-  gtk_box_pack_start( GTK_BOX(box), gtkui_drawing_area, TRUE, TRUE, 0 );
-
-  /* Create the statusbar */
-  gtkstatusbar_create( GTK_BOX( box ) );
-
-  gtk_widget_show_all( gtkui_window );
-  gtkstatusbar_set_visibility( settings_current.statusbar );
-
-  ui_mouse_present = 1;
-
-  return 0;
-}
+extern libspectrum_tape *tape;
 
 static void
 gtkui_menu_deactivate( GtkMenuShell *menu GCC_UNUSED,

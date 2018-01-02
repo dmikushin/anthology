@@ -179,6 +179,9 @@ init_colours( colour_format_t format )
 int
 uidisplay_init( int width, int height )
 {
+	width = gtk_widget_get_allocated_width(gtkui_window);
+	height = gtk_widget_get_allocated_height(gtkui_window);
+
   int x, y, error;
   libspectrum_dword black;
   const char *machine_name;

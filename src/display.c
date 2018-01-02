@@ -163,9 +163,6 @@ display_init( int *argc, char ***argv )
   int i, j, k, x, y;
   int error;
 
-  if(ui_init(argc, argv))
-    return 1;
-
   /* Set up the 'all pixels must be refreshed' marker */
   display_all_dirty = 0;
   for( i = 0; i < DISPLAY_SCREEN_WIDTH_COLS; i++ )
@@ -206,7 +203,7 @@ display_init( int *argc, char ***argv )
   display_last_border = scld_last_dec.name.hires ?
                             display_hires_border : display_lores_border;
 
-  return 0;
+  return ui_init(argc, argv);
 }
 
 /* Mark as 'dirty' the pixels which have been changed by a write to

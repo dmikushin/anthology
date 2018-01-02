@@ -132,7 +132,7 @@ gtkstatusbar_set_visibility( int visible )
 void
 gtkstatusbar_update_machine( const char *name )
 {
-  gtk_label_set_text( GTK_LABEL( machine_name ), name );
+//  gtk_label_set_text( GTK_LABEL( machine_name ), name );
 }
 
 int
@@ -145,7 +145,7 @@ ui_statusbar_update( ui_statusbar_item item, ui_statusbar_state state )
   case UI_STATUSBAR_ITEM_DISK:
     switch( state ) {
     case UI_STATUSBAR_STATE_NOT_AVAILABLE:
-      gtk_widget_hide( disk_status ); break;
+      /*gtk_widget_hide( disk_status );*/ break;
     case UI_STATUSBAR_STATE_ACTIVE:
       gtk_widget_show( disk_status );
       gtk_image_set_from_pixbuf( GTK_IMAGE( disk_status ), pixbuf_disk_active );
@@ -173,7 +173,7 @@ ui_statusbar_update( ui_statusbar_item item, ui_statusbar_state state )
   case UI_STATUSBAR_ITEM_MICRODRIVE:
     switch( state ) {
     case UI_STATUSBAR_STATE_NOT_AVAILABLE:
-      gtk_widget_hide( microdrive_status ); break;
+      /*gtk_widget_hide( microdrive_status );*/ break;
     case UI_STATUSBAR_STATE_ACTIVE:
       gtk_widget_show( microdrive_status );
       gtk_image_set_from_pixbuf( GTK_IMAGE( microdrive_status ),
@@ -207,7 +207,7 @@ ui_statusbar_update_speed( float speed )
   char buffer[8];
 
   snprintf( buffer, 8, "%3.0f%%", speed );
-  gtk_label_set_text( GTK_LABEL( speed_status ), buffer );
+/*  gtk_label_set_text( GTK_LABEL( speed_status ), buffer );*/
 
   return 0;
 }

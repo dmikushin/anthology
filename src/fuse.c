@@ -137,9 +137,7 @@ typedef struct start_files_t {
 
 } start_files_t;
 
-static int fuse_init(int argc, char **argv);
-
-static int creator_init( void );
+int creator_init( void );
 static void fuse_show_copyright(void);
 static void fuse_show_version( void );
 static void fuse_show_help( void );
@@ -151,52 +149,12 @@ static int do_start_files( start_files_t *start_files );
 
 static int fuse_end(void);
 
-#ifdef UI_WIN32
-int fuse_main(int argc, char **argv)
-#else
+int error, first_arg;
+char *start_scaler;
+start_files_t start_files;
+
 int main(int argc, char **argv)
-#endif
 {
-  int r;
-
-#ifdef WIN32
-  SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );
-#endif
-
-#ifdef GEKKO
-  fatInitDefault();
-#endif				/* #ifdef GEKKO */
-  
-  if(fuse_init(argc,argv)) {
-    fprintf(stderr,"%s: error initialising -- giving up!\n", fuse_progname);
-    return 1;
-  }
-
-  if( settings_current.show_help ||
-      settings_current.show_version ) return 0;
-
-  if( settings_current.unittests ) {
-    r = unittests_run();
-  } else {
-    while( !fuse_exiting ) {
-      z80_do_opcodes();
-      event_do_events();
-    }
-    r = 0;
-  }
-
-  fuse_end();
-  
-  return r;
-
-}
-
-static int fuse_init(int argc, char **argv)
-{
-  int error, first_arg;
-  char *start_scaler;
-  start_files_t start_files;
-
   /* Seed the bad but widely-available random number
      generator with the current time */
   srand( (unsigned)time( NULL ) );
@@ -208,12 +166,6 @@ static int fuse_init(int argc, char **argv)
     fuse_progname = "fuse";
   
   libspectrum_error_function = ui_libspectrum_error;
-
-#ifdef GEKKO
-  /* On the Wii, init the display first so we have a way of outputting
-     messages */
-  if( display_init(&argc,&argv) ) return 1;
-#endif
 
   if( settings_init( &first_arg, argc, argv ) ) return 1;
 
@@ -242,22 +194,26 @@ static int fuse_init(int argc, char **argv)
 
   event_init();
   
-#ifndef GEKKO
-  if( display_init(&argc,&argv) ) return 1;
-#endif
+  return display_init(&argc,&argv);
+}
 
-  if( libspectrum_check_version( LIBSPECTRUM_MIN_VERSION ) ) {
-    if( libspectrum_init() ) return 1;
-  } else {
-    ui_error( UI_ERROR_ERROR,
-              "libspectrum version %s found, but %s required",
-	      libspectrum_version(), LIBSPECTRUM_MIN_VERSION );
-    return 1;
-  }
+int machine_init( void )
+{
+	if (libspectrum_check_version(LIBSPECTRUM_MIN_VERSION))
+	{
+		if (libspectrum_init())
+			exit(1);
+	}
+	else
+	{
+		fprintf(stderr, "libspectrum version %s found, but %s required",
+			libspectrum_version(), LIBSPECTRUM_MIN_VERSION );
+		exit(1);
+	}
 
-  /* Must be called after libspectrum_init() so we can get the gcrypt
-     version */
-  if( creator_init() ) return 1;
+	// Must be called after libspectrum_init() so we can get the gcrypt version
+	if (creator_init())
+		exit(1);
 
 #ifdef HAVE_GETEUID
   /* Drop root privs if we have them */
@@ -294,7 +250,7 @@ static int fuse_init(int argc, char **argv)
   melodik_init();
   speccyboot_init();
   specdrum_init();
-  spectranet_init();
+  //spectranet_init();
   machines_periph_init();
 
   z80_init();
@@ -314,10 +270,6 @@ static int fuse_init(int argc, char **argv)
   error = scaler_select_id( start_scaler ); libspectrum_free( start_scaler );
   if( error ) return error;
 
-  if( setup_start_files( &start_files ) ) return 1;
-  if( parse_nonoption_args( argc, argv, first_arg, &start_files ) ) return 1;
-  if( do_start_files( &start_files ) ) return 1;
-
   /* Must do this after all subsytems are initialised */
   debugger_command_evaluate( settings_current.debugger_command );
 
@@ -325,11 +277,8 @@ static int fuse_init(int argc, char **argv)
 
   fuse_emulation_paused = 0;
   movie_init();
-
-  return 0;
 }
 
-static
 int creator_init( void )
 {
   size_t i;

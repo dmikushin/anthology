@@ -617,7 +617,7 @@ static const struct menu_item_entries menu_item_lookup[] = {
 int
 ui_menu_activate( ui_menu_item item, int active )
 {
-  const struct menu_item_entries *ptr;
+/*  const struct menu_item_entries *ptr;
 
   for( ptr = menu_item_lookup; ptr->string1; ptr++ ) {
 
@@ -647,7 +647,8 @@ ui_menu_activate( ui_menu_item item, int active )
   }
 
   ui_error( UI_ERROR_ERROR, "ui_menu_activate: unknown item %d", item );
-  return 1;
+  return 1;*/
+  return 0;
 }
 
 void

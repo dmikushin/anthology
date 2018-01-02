@@ -51,7 +51,7 @@
 #include "z80/z80_macros.h"
 
 /* The current tape */
-static libspectrum_tape *tape;
+libspectrum_tape *tape;
 
 /* Has the current tape been modified since it was last loaded/saved? */
 int tape_modified;
