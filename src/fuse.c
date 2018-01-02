@@ -267,7 +267,7 @@ int machine_init( void )
 
   tape_init();
 
-  error = scaler_select_id( start_scaler ); libspectrum_free( start_scaler );
+  error = scaler_select_id( start_scaler );
   if( error ) return error;
 
   /* Must do this after all subsytems are initialised */
@@ -812,6 +812,7 @@ static int fuse_end(void)
   module_end();
   pokemem_end();
 
+  libspectrum_free( start_scaler );
   libspectrum_creator_free( fuse_creator );
   libspectrum_end();
 

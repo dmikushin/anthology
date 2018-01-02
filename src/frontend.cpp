@@ -54,7 +54,7 @@ public :
 	   
 		sample = al_load_sample(tracks[rand() % (sizeof(tracks) / sizeof(tracks[0]))]);
 	
-		al_play_sample(sample, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, &sampleId);
+		al_play_sample(sample, 2.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, &sampleId);
 	}
 	
 	~Music()
@@ -203,6 +203,7 @@ extern "C" int utils_open_file(const char *filename, int autoload, void *type);
 extern "C"
 {
 	int fuse_exiting;
+	extern int stop_event;
 }
 
 class ZX80
@@ -282,6 +283,7 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer use
 		{
 		case GDK_KEY_Escape :
 			is_game_active = FALSE;
+			stop_event = -1;
 			gtk_widget_queue_draw(widget);
 			break;
 		}

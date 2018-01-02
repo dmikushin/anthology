@@ -70,7 +70,8 @@ static const char *event_type_string = "tape";
 
 static const char *play_event_detail_string = "play",
   *stop_event_detail_string = "stop";
-static int play_event, stop_event = -1;
+static int play_event;
+int stop_event = -1;
 
 /* Spectrum events */
 int tape_edge_event;
