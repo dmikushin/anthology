@@ -113,19 +113,6 @@ static void gtkdisplay_area(int x, int y, int width, int height);
 static void register_scalers( int force_scaler );
 static void gtkdisplay_load_gfx_mode( void );
 
-/* Callbacks */
-
-#if !GTK_CHECK_VERSION( 3, 0, 0 )
-static gint gtkdisplay_expose(GtkWidget *widget, GdkEvent *event,
-                              gpointer data);
-#else
-static gboolean gtkdisplay_draw( GtkWidget *widget, cairo_t *cr,
-                                 gpointer user_data );
-#endif                /* #if !GTK_CHECK_VERSION( 3, 0, 0 ) */
-
-static gint drawing_area_resize_callback( GtkWidget *widget, GdkEvent *event,
-                                          gpointer data );
-
 static int
 init_colours( colour_format_t format )
 {
@@ -185,26 +172,10 @@ uidisplay_init( int width, int height )
   int x, y, error;
   libspectrum_dword black;
   const char *machine_name;
-  colour_format_t colour_format;
+  colour_format_t colour_format = FORMAT_x8r8g8b8;
 
-#if !GTK_CHECK_VERSION( 3, 0, 0 )
-
-  g_signal_connect( G_OBJECT( gtkui_drawing_area ), "expose_event",
-                    G_CALLBACK( gtkdisplay_expose ), NULL );
-
-  colour_format = FORMAT_x8b8g8r8;
-
-#else
-
-  g_signal_connect( G_OBJECT( gtkui_drawing_area ), "draw",
-                    G_CALLBACK( gtkdisplay_draw ), NULL );
-
-  colour_format = FORMAT_x8r8g8b8;
-
-#endif                /* #if !GTK_CHECK_VERSION( 3, 0, 0 ) */
-
-  g_signal_connect( G_OBJECT( gtkui_drawing_area ), "configure_event",
-                    G_CALLBACK( drawing_area_resize_callback ), NULL );
+  /*g_signal_connect( G_OBJECT( gtkui_drawing_area ), "configure_event",
+                    G_CALLBACK( drawing_area_resize_callback ), NULL );*/
 
   error = init_colours( colour_format ); if( error ) return error;
 
@@ -217,57 +188,19 @@ uidisplay_init( int width, int height )
   image_width = width; image_height = height;
   image_scale = width / DISPLAY_ASPECT_WIDTH;
 
-  register_scalers( 0 );
+  /*register_scalers( 0 );
 
-  display_refresh_all();
+  display_refresh_all();*/
 
   if ( scaler_select_scaler( current_scaler ) )
         scaler_select_scaler( SCALER_NORMAL );
 
-  gtkdisplay_load_gfx_mode();
+  //gtkdisplay_load_gfx_mode();
 
   machine_name = libspectrum_machine_name( machine_current->machine );
   gtkstatusbar_update_machine( machine_name );
 
   display_ui_initialised = 1;
-
-  return 0;
-}
-
-static int
-drawing_area_resize( int width, int height, int force_scaler )
-{
-  int size;
-
-  size = width / DISPLAY_ASPECT_WIDTH;
-  if( size > height / DISPLAY_SCREEN_HEIGHT )
-    size = height / DISPLAY_SCREEN_HEIGHT;
-
-  /* If we're the same size as before, no need to do anything else */
-  if( size == gtkdisplay_current_size ) return 0;
-
-  gtkdisplay_current_size = size;
-
-  register_scalers( force_scaler );
-
-  memset( scaled_image, 0, sizeof( scaled_image ) );
-
-#if GTK_CHECK_VERSION( 3, 0, 0 )
-
-  /* Create a bigger surface for the new display size */
-  float scale = (float)gtkdisplay_current_size / image_scale;
-  if( surface ) cairo_surface_destroy( surface );
-
-  surface =
-      cairo_image_surface_create_for_data( scaled_image,
-                                           CAIRO_FORMAT_RGB24,
-                                           scale * image_width,
-                                           scale * image_height,
-                                           scaled_pitch );
-
-#endif                /* #if GTK_CHECK_VERSION( 3, 0, 0 ) */
-
-  display_refresh_all();
 
   return 0;
 }
@@ -365,12 +298,12 @@ uidisplay_area( int x, int y, int w, int h )
   }
 
   /* Create scaled image */
-  scaler_proc32( &rgb_image[ ( y + 2 ) * rgb_pitch + 4 * ( x + 1 ) ],
+  /*scaler_proc32( &rgb_image[ ( y + 2 ) * rgb_pitch + 4 * ( x + 1 ) ],
                  rgb_pitch,
                  &scaled_image[ scaled_y * scaled_pitch + 4 * scaled_x ],
                  scaled_pitch, w, h );
 
-  w *= scale; h *= scale;
+  w *= scale; h *= scale;*/
 
   /* Blit to the real screen */
   gtkdisplay_area( scaled_x, scaled_y, w, h );
@@ -378,20 +311,13 @@ uidisplay_area( int x, int y, int w, int h )
 
 static void gtkdisplay_area(int x, int y, int width, int height)
 {
-#if !GTK_CHECK_VERSION( 3, 0, 0 )
+	display_updated = 1;
 
-  gdk_draw_rgb_32_image( gtkui_drawing_area->window,
-                         gtkui_drawing_area->style->fg_gc[GTK_STATE_NORMAL],
-                         x, y, width, height, GDK_RGB_DITHER_NONE,
-                         &scaled_image[ y * scaled_pitch + 4 * x ],
-                         scaled_pitch );
+	width = gtk_widget_get_allocated_width(gtkui_window);
+	height = gtk_widget_get_allocated_height(gtkui_window);
 
-#else
-  display_updated = 1;
 
-  gtk_widget_queue_draw_area( gtkui_drawing_area, x, y, width, height );
-
-#endif                /* #if !GTK_CHECK_VERSION( 3, 0, 0 ) */
+	gtk_widget_queue_draw_area( gtkui_drawing_area, 0, 0, width, height );
 }
 
 int
@@ -400,7 +326,7 @@ uidisplay_hotswap_gfx_mode( void )
   fuse_emulation_pause();
 
   /* Setup the new GFX mode */
-  gtkdisplay_load_gfx_mode();
+  //gtkdisplay_load_gfx_mode();
 
   fuse_emulation_unpause();
 
@@ -497,57 +423,6 @@ uidisplay_plot16( int x, int y, libspectrum_word data,
     gtkdisplay_image[y][x+14] = ( data & 0x0002 ) ? ink : paper;
     gtkdisplay_image[y][x+15] = ( data & 0x0001 ) ? ink : paper;
   }
-}
-
-/* Callbacks */
-
-#if !GTK_CHECK_VERSION( 3, 0, 0 )
-
-/* Called by gtkui_drawing_area on "expose_event" */
-static gint
-gtkdisplay_expose( GtkWidget *widget GCC_UNUSED, GdkEvent *event,
-                   gpointer data GCC_UNUSED )
-{
-  gtkdisplay_area(event->expose.area.x, event->expose.area.y,
-                  event->expose.area.width, event->expose.area.height);
-  return TRUE;
-}
-
-#else                 /* #if !GTK_CHECK_VERSION( 3, 0, 0 ) */
-
-/* Called by gtkui_drawing_area on "draw" event */
-static gboolean
-gtkdisplay_draw( GtkWidget *widget, cairo_t *cr, gpointer user_data )
-{
-  /* Create a new surface for this gfx mode */
-  if( !surface ) {
-    float scale = (float)gtkdisplay_current_size / image_scale;
-
-    surface =
-      cairo_image_surface_create_for_data( scaled_image,
-                                           CAIRO_FORMAT_RGB24,
-                                           scale * image_width,
-                                           scale * image_height,
-                                           scaled_pitch );
-  }
-
-  /* Repaint the drawing area */
-  cairo_set_source_surface( cr, surface, 0, 0 );
-  cairo_set_operator( cr, CAIRO_OPERATOR_SOURCE );
-  cairo_paint( cr );
-
-  return FALSE;
-}
-
-#endif                /* #if !GTK_CHECK_VERSION( 3, 0, 0 ) */
-
-/* Called by gtkui_drawing_area on "configure_event" */
-static gint
-drawing_area_resize_callback( GtkWidget *widget GCC_UNUSED, GdkEvent *event,
-                              gpointer data GCC_UNUSED )
-{
-  drawing_area_resize( event->configure.width, event->configure.height, 1 );
-  return TRUE;
 }
 
 static void

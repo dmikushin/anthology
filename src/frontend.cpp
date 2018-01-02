@@ -3,7 +3,9 @@
 #include <allegro5/allegro_acodec.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#include <libspectrum.h>
 #include <memory>
+#include <vector>
 
 extern "C"
 {
@@ -65,7 +67,8 @@ public :
 	}
 };
 
-const char* Music::tracks[] = {
+const char* Music::tracks[] =
+{
 	"music/evelynn.ogg",
 	"music/adventure.ogg"
 };
@@ -120,8 +123,8 @@ class Menu
 
 			cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
 
-			int width = gtk_widget_get_allocated_width(widget);
-			int height = gtk_widget_get_allocated_height(widget);
+			size_t width = gtk_widget_get_allocated_width(widget);
+			size_t height = gtk_widget_get_allocated_height(widget);
 
 			cairo_set_source_rgb(cr, 0.9, 0.9, 0);
 			cairo_set_line_width(cr, 10);
@@ -187,7 +190,8 @@ public :
 
 int Menu::indexes[3] = { 0, 1, 2 };
 
-const char* Menu::screens[3] = {
+const char* Menu::screens[3] =
+{
 	"games/chopper/chopper.png",
 	"games/3dmoto/3dmoto.png",
 	"games/pool/pool.png"
@@ -200,10 +204,16 @@ extern "C" void z80_do_opcodes();
 extern "C" int event_do_events();
 extern "C" int utils_open_file(const char *filename, int autoload, void *type);
 
+#define DISPLAY_SCREEN_WIDTH 320
+#define DISPLAY_SCREEN_HEIGHT 240
+
 extern "C"
 {
 	int fuse_exiting;
 	extern int stop_event;
+
+	// A copy of every pixel on the screen
+	extern libspectrum_word gtkdisplay_image[2 * DISPLAY_SCREEN_HEIGHT][DISPLAY_SCREEN_WIDTH];
 }
 
 class ZX80
@@ -212,16 +222,91 @@ class ZX80
 	GtkWidget** gtkui_drawing_area;
 
 	static const char* games[3];
+	
+	vector<uint32_t> pixels;
+	int stride;
+	
+	cairo_surface_t *surface;
+
+	uint32_t palette[16];
+
+	// Called by gtkui_drawing_area on "draw" event
+	static gboolean gtkdisplay_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data)
+	{
+		ZX80& zx80 = *(ZX80*)user_data;
+	
+		size_t width = gtk_widget_get_allocated_width(widget);
+		size_t height = gtk_widget_get_allocated_height(widget);
+
+		if (zx80.pixels.size() != width * height)
+		{
+			zx80.pixels.resize(width * height);
+	
+			// Create a new surface, if size has changed.
+			if (zx80.surface) cairo_surface_destroy(zx80.surface);
+
+			zx80.stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, DISPLAY_SCREEN_WIDTH);
+
+			zx80.surface = cairo_image_surface_create_for_data((unsigned char*)&zx80.pixels[0], CAIRO_FORMAT_RGB24,
+				DISPLAY_SCREEN_WIDTH, DISPLAY_SCREEN_HEIGHT, zx80.stride);
+		}
+		
+		// Copy from gtkdisplay_image, converting the format
+		for (int yy = 0; yy < DISPLAY_SCREEN_HEIGHT; yy++)
+		{
+			uint32_t *rgb24 = (uint32_t*)((char*)&zx80.pixels[0] + yy * zx80.stride);
+
+			libspectrum_word *display = &gtkdisplay_image[yy * 2][0];
+
+			for (int i = 0; i < DISPLAY_SCREEN_WIDTH; i++)
+				rgb24[i] = zx80.palette[display[i]];
+		}
+
+		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+
+		float scaleX = (float)width / DISPLAY_SCREEN_WIDTH;
+		float scaleY = (float)height / DISPLAY_SCREEN_HEIGHT;
+		cairo_scale(cr, scaleX, scaleY);
+
+		// Repaint the drawing area
+		cairo_set_source_surface(cr, zx80.surface, 0, 0);
+		cairo_paint(cr);
+
+		return FALSE;
+	}
+
+	static void initPalette(libspectrum_dword* palette)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			guchar red, green, blue;
+
+			red   = rgbColors[i][0];
+			green = rgbColors[i][1];
+			blue  = rgbColors[i][2];
+
+#ifdef WORDS_BIGENDIAN
+			palette[i] = blue << 24 | green << 16 |  red << 8;
+#else
+			palette[i] = blue | green << 8 |  red << 16;
+#endif // WORDS_BIGENDIAN
+		}
+	}
+	
+	// The color palette
+	static const guchar rgbColors[16][3];
 
 public :
 
-	ZX80(GtkWidget *window_, GtkWidget** gtkui_drawing_area_) : window(window_), gtkui_drawing_area(gtkui_drawing_area_)
+	ZX80(GtkWidget *window_, GtkWidget** gtkui_drawing_area_) :
+		window(window_), gtkui_drawing_area(gtkui_drawing_area_),
+		pixels(0), surface(NULL)
 	{
+		initPalette((libspectrum_dword*)palette);
+	
 		*gtkui_drawing_area = gtk_drawing_area_new();
 
-		// TODO fullscreen, no boundaries
-		// Set minimum size for drawing area
-//		gtk_widget_set_size_request(gtkui_drawing_area, DISPLAY_ASPECT_WIDTH, DISPLAY_SCREEN_HEIGHT);
+		g_signal_connect(G_OBJECT(*gtkui_drawing_area), "draw", G_CALLBACK(gtkdisplay_draw), this);
 
 		gtk_container_add(GTK_CONTAINER(window), *gtkui_drawing_area);
 
@@ -236,10 +321,31 @@ public :
 	}
 };
 
-const char* ZX80::games[3] = {
+const char* ZX80::games[3] =
+{
 	"games/chopper/chopper.tzx",
 	"games/3dmoto/3dmoto.tzx",
 	"games/pool/pool.tzx"
+};
+
+const guchar ZX80::rgbColors[16][3] =
+{
+	{   0,   0,   0 },
+	{   0,   0, 192 },
+	{ 192,   0,   0 },
+	{ 192,   0, 192 },
+	{   0, 192,   0 },
+	{   0, 192, 192 },
+	{ 192, 192,   0 },
+	{ 192, 192, 192 },
+	{   0,   0,   0 },
+	{   0,   0, 255 },
+	{ 255,   0,   0 },
+	{ 255,   0, 255 },
+	{   0, 255,   0 },
+	{   0, 255, 255 },
+	{ 255, 255,   0 },
+	{ 255, 255, 255 },
 };
 
 unique_ptr<ZX80> zx80 = NULL;
@@ -336,6 +442,7 @@ extern "C" int ui_init(int *argc, char ***argv)
 
 	gtk_window_set_default_size(GTK_WINDOW(widget), 800, 480);
 	gtk_window_set_position(GTK_WINDOW(widget), GTK_WIN_POS_CENTER);
+	gtk_window_maximize(GTK_WINDOW(widget));
 
 	gtk_widget_show_all(widget);
 
