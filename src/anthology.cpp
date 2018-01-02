@@ -203,6 +203,8 @@ extern "C" int machine_init();
 extern "C" void z80_do_opcodes();
 extern "C" int event_do_events();
 extern "C" int utils_open_file(const char *filename, int autoload, void *type);
+extern "C" int gtkkeyboard_keypress(GtkWidget *widget, GdkEvent *event, gpointer data);
+extern "C" int gtkkeyboard_keyrelease(GtkWidget *widget, GdkEvent *event, gpointer data);
 
 #define DISPLAY_SCREEN_WIDTH 320
 #define DISPLAY_SCREEN_HEIGHT 240
@@ -307,6 +309,9 @@ public :
 		*gtkui_drawing_area = gtk_drawing_area_new();
 
 		g_signal_connect(G_OBJECT(*gtkui_drawing_area), "draw", G_CALLBACK(gtkdisplay_draw), this);
+		g_signal_connect(G_OBJECT(window), "key-press-event", G_CALLBACK(gtkkeyboard_keypress), NULL);
+		gtk_widget_add_events(window, GDK_KEY_RELEASE_MASK );
+		g_signal_connect(G_OBJECT(window), "key-release-event", G_CALLBACK(gtkkeyboard_keyrelease), NULL);
 
 		gtk_container_add(GTK_CONTAINER(window), *gtkui_drawing_area);
 
