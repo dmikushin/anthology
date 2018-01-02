@@ -434,6 +434,8 @@ extern "C" int ui_init(int *argc, char ***argv)
 	/* create a new window */
 	GtkWidget *widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtkui_window = widget;
+
+	gtk_window_set_title(GTK_WINDOW(widget), "Anthology");
 	
 	g_signal_connect(G_OBJECT(widget), "delete-event", G_CALLBACK (delete_event), NULL);
 	g_signal_connect(G_OBJECT(widget), "key_press_event", G_CALLBACK (on_key_press), NULL);
