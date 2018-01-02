@@ -129,9 +129,6 @@ button_action( SDL_JoyButtonEvent *buttonevent, input_event_type type )
 
 			if (native_key == INPUT_KEY_Escape)
 			{
-				// Ignore joystick
-				SDL_JoystickEventState( SDL_IGNORE );
-
 				is_game_active = FALSE;
 				stop_event = -1;
 				gtk_widget_queue_draw(gtkui_window);
