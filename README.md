@@ -1,4 +1,8 @@
+## Anthology
+
 Simplification of ZX Spectrum Fuse emulator with menu and joystick support for playing old games with kids.
+
+<img src="https://github.com/dmikushin/anthology/blob/master/screen.jpg" width="300" />
 
 ```
 $ sudo apt-get install libspectrum-dev libgtk-3-dev libsdl1.2-dev liballegro5-dev
