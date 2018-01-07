@@ -329,7 +329,6 @@ menu_options_general_done( GtkWidget *widget GCC_UNUSED,
 
   gtk_widget_destroy( ptr->dialog );
 
-  gtkstatusbar_set_visibility( settings_current.statusbar );
   display_refresh_all();
 
   gtk_main_quit();
@@ -513,7 +512,6 @@ menu_options_peripherals_general_done( GtkWidget *widget GCC_UNUSED,
 
   periph_posthook();
 
-  gtkstatusbar_set_visibility( settings_current.statusbar );
   display_refresh_all();
 
   gtk_main_quit();
@@ -697,7 +695,6 @@ menu_options_peripherals_disk_done( GtkWidget *widget GCC_UNUSED,
 
   periph_posthook();
 
-  gtkstatusbar_set_visibility( settings_current.statusbar );
   display_refresh_all();
 
   gtk_main_quit();
@@ -805,7 +802,6 @@ menu_options_rzx_done( GtkWidget *widget GCC_UNUSED,
 
   gtk_widget_destroy( ptr->dialog );
 
-  gtkstatusbar_set_visibility( settings_current.statusbar );
   display_refresh_all();
 
   gtk_main_quit();
@@ -1054,7 +1050,6 @@ menu_options_sound_done( GtkWidget *widget GCC_UNUSED,
 
   gtk_widget_destroy( ptr->dialog );
 
-  gtkstatusbar_set_visibility( settings_current.statusbar );
   display_refresh_all();
 
   gtk_main_quit();
@@ -1712,7 +1707,6 @@ menu_options_diskoptions_done( GtkWidget *widget GCC_UNUSED,
 
   gtk_widget_destroy( ptr->dialog );
 
-  gtkstatusbar_set_visibility( settings_current.statusbar );
   display_refresh_all();
 
   gtk_main_quit();
@@ -1818,7 +1812,6 @@ menu_options_movie_done( GtkWidget *widget GCC_UNUSED,
 
   gtk_widget_destroy( ptr->dialog );
 
-  gtkstatusbar_set_visibility( settings_current.statusbar );
   display_refresh_all();
 
   gtk_main_quit();

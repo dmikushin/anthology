@@ -37,7 +37,6 @@
 #include "screenshot.h"
 #include "ui/ui.h"
 #include "ui/uidisplay.h"
-#include "ui/scaler/scaler.h"
 #include "settings.h"
 
 /* The size of a 1x1 image in units of
@@ -58,11 +57,6 @@ ptrdiff_t gtkdisplay_pitch = DISPLAY_SCREEN_WIDTH * sizeof( libspectrum_word );
 static guchar rgb_image[ 4 * 2 * ( DISPLAY_SCREEN_HEIGHT + 4 ) *
                                  ( DISPLAY_SCREEN_WIDTH  + 3 )   ];
 static const gint rgb_pitch = ( DISPLAY_SCREEN_WIDTH + 3 ) * 4;
-
-/* The scaled image */
-static guchar scaled_image[ 3 * DISPLAY_SCREEN_HEIGHT *
-                            6 * DISPLAY_SCREEN_WIDTH ];
-static const ptrdiff_t scaled_pitch = 6 * DISPLAY_SCREEN_WIDTH;
 
 /* The colour palette */
 static const guchar rgb_colours[16][3] = {
@@ -101,8 +95,6 @@ typedef enum {
 
 static int display_updated = 0;
 
-static cairo_surface_t *surface = NULL;
-
 #endif                /* #if GTK_CHECK_VERSION( 3, 0, 0 ) */
 
 /* The current size of the window (in units of DISPLAY_SCREEN_*) */
@@ -110,8 +102,6 @@ static int gtkdisplay_current_size=1;
 
 static int init_colours( colour_format_t format );
 static void gtkdisplay_area(int x, int y, int width, int height);
-static void register_scalers( int force_scaler );
-static void gtkdisplay_load_gfx_mode( void );
 
 static int
 init_colours( colour_format_t format )
@@ -171,11 +161,7 @@ uidisplay_init( int width, int height )
 
   int x, y, error;
   libspectrum_dword black;
-  const char *machine_name;
   colour_format_t colour_format = FORMAT_x8r8g8b8;
-
-  /*g_signal_connect( G_OBJECT( gtkui_drawing_area ), "configure_event",
-                    G_CALLBACK( drawing_area_resize_callback ), NULL );*/
 
   error = init_colours( colour_format ); if( error ) return error;
 
@@ -188,70 +174,9 @@ uidisplay_init( int width, int height )
   image_width = width; image_height = height;
   image_scale = width / DISPLAY_ASPECT_WIDTH;
 
-  /*register_scalers( 0 );
-
-  display_refresh_all();*/
-
-  if ( scaler_select_scaler( current_scaler ) )
-        scaler_select_scaler( SCALER_NORMAL );
-
-  //gtkdisplay_load_gfx_mode();
-
-  machine_name = libspectrum_machine_name( machine_current->machine );
-  gtkstatusbar_update_machine( machine_name );
-
   display_ui_initialised = 1;
 
   return 0;
-}
-
-static void
-register_scalers( int force_scaler )
-{
-  scaler_type scaler;
-
-  scaler_register_clear();
-
-  if( machine_current->timex ) {
-    scaler_register( SCALER_HALF );
-    scaler_register( SCALER_HALFSKIP );
-    scaler_register( SCALER_TIMEXTV );
-    scaler_register( SCALER_TIMEX1_5X );
-  } else {
-    scaler_register( SCALER_DOUBLESIZE );
-    scaler_register( SCALER_TRIPLESIZE );
-    scaler_register( SCALER_TV2X );
-    scaler_register( SCALER_TV3X );
-    scaler_register( SCALER_PALTV2X );
-    scaler_register( SCALER_PALTV3X );
-    scaler_register( SCALER_HQ2X );
-    scaler_register( SCALER_HQ3X );
-    scaler_register( SCALER_ADVMAME2X );
-    scaler_register( SCALER_ADVMAME3X );
-    scaler_register( SCALER_2XSAI );
-    scaler_register( SCALER_SUPER2XSAI );
-    scaler_register( SCALER_SUPEREAGLE );
-    scaler_register( SCALER_DOTMATRIX );
-  }
-  scaler_register( SCALER_NORMAL );
-  scaler_register( SCALER_PALTV );
-
-  scaler =
-    scaler_is_supported( current_scaler ) ? current_scaler : SCALER_NORMAL;
-
-  if( force_scaler ) {
-    switch( gtkdisplay_current_size ) {
-    case 1: scaler = machine_current->timex ? SCALER_HALF : SCALER_NORMAL;
-      break;
-    case 2: scaler = machine_current->timex ? SCALER_NORMAL : SCALER_DOUBLESIZE;
-      break;
-    case 3: scaler = machine_current->timex ? SCALER_TIMEX1_5X :
-                                              SCALER_TRIPLESIZE;
-      break;
-    }
-  }
-
-  scaler_select_scaler( scaler );
 }
 
 void

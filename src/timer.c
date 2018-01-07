@@ -83,8 +83,6 @@ timer_estimate_speed( void )
                       ( current_time - stored_times[ next_stored_time ] );
   }
 
-  ui_statusbar_update_speed( current_speed );
-
   stored_times[ next_stored_time ] = current_time;
 
   next_stored_time = ( next_stored_time + 1 ) % 10;

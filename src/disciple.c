@@ -291,8 +291,6 @@ disciple_reset( int hard_reset )
   fdd_select( &disciple_drives[ 0 ].fdd, 1 );
   machine_current->memory_map();
   disciple_event_index( 0, index_event, NULL );
-
-  ui_statusbar_update( UI_STATUSBAR_ITEM_DISK, UI_STATUSBAR_STATE_INACTIVE );
 }
 
 void

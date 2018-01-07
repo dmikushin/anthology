@@ -266,8 +266,6 @@ menu_machine_pause( GtkAction *gtk_action GCC_UNUSED, gpointer data GCC_UNUSED )
 
   if( paused ) {
     paused = 0;
-    ui_statusbar_update( UI_STATUSBAR_ITEM_PAUSED,
-			 UI_STATUSBAR_STATE_INACTIVE );
     timer_estimate_reset();
     gtk_main_quit();
   } else {
@@ -279,7 +277,6 @@ menu_machine_pause( GtkAction *gtk_action GCC_UNUSED, gpointer data GCC_UNUSED )
     }
 
     paused = 1;
-    ui_statusbar_update( UI_STATUSBAR_ITEM_PAUSED, UI_STATUSBAR_STATE_ACTIVE );
 
     /* Create nested main loop outside this callback to allow unpause */
     g_idle_add( (GSourceFunc)gtkui_run_main_loop, NULL );
