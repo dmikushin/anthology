@@ -8,7 +8,7 @@ CXXFLAGS = -std=c++11
 
 C_SOURCES = $(wildcard src/*.c)
 CPP_SOURCES = $(wildcard src/*.cpp)
-OBJECTS = $(C_SOURCES:src/%.c=%.o) $(CPP_SOURCES:src/%.cpp=%.o) scalers32.o
+OBJECTS = $(C_SOURCES:src/%.c=%.o) $(CPP_SOURCES:src/%.cpp=%.o)
 
 all: anthology
 
@@ -20,12 +20,6 @@ anthology: $(OBJECTS)
 
 %.o: src/%.cpp
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -c $< -o $@
-
-scalers.o: src/scalers.c
-	$(CC) $(CFLAGS) -DSCALER_DATA_SIZE=2 -c $< -o $@
-
-scalers32.o: src/scalers.c
-	$(CC) $(CFLAGS) -DSCALER_DATA_SIZE=4 -c $< -o $@
 
 clean:
 	rm -rf *.o anthology

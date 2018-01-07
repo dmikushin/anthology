@@ -26,7 +26,6 @@
 #include <config.h>
 
 #include "event.h"
-#include "movie.h"
 #include "settings.h"
 #include "sound.h"
 #include "tape.h"

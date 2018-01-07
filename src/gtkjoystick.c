@@ -36,7 +36,6 @@
 #include "gtkinternals.h"
 #include "keyboard.h"
 #include "peripherals/joystick.h"
-#include "menu.h"
 #include "settings.h"
 
 #if !defined USE_JOYSTICK || defined HAVE_JSW_H

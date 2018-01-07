@@ -40,7 +40,6 @@
 #include "peripherals/disk/disciple.h"
 #include "peripherals/disk/opus.h"
 #include "peripherals/disk/plusd.h"
-#include "ui/scaler/scaler.h"
 
 /* The various severities of error level, increasing downwards */
 typedef enum ui_error_level {

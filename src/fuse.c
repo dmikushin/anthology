@@ -60,7 +60,6 @@
 #include "machines/machines_periph.h"
 #include "memory.h"
 #include "module.h"
-#include "movie.h"
 #include "mempool.h"
 #include "peripherals/ay.h"
 #include "peripherals/dck.h"
@@ -91,7 +90,6 @@
 #include "spectrum.h"
 #include "tape.h"
 #include "timer/timer.h"
-#include "ui/scaler/scaler.h"
 #include "ui/ui.h"
 #include "unittests/unittests.h"
 #include "utils.h"
@@ -266,16 +264,12 @@ int machine_init( void )
 
   tape_init();
 
-  error = scaler_select_id( start_scaler );
-  if( error ) return error;
-
   /* Must do this after all subsytems are initialised */
   debugger_command_evaluate( settings_current.debugger_command );
 
   if( ui_mouse_present ) ui_mouse_grabbed = ui_mouse_grab( 1 );
 
   fuse_emulation_paused = 0;
-  movie_init();
 }
 
 int creator_init( void )
@@ -771,7 +765,6 @@ do_start_files( start_files_t *start_files )
 /* Tidy-up function called at end of emulation */
 static int fuse_end(void)
 {
-  movie_stop();		/* stop movie recording */
   /* Must happen before memory is deallocated as we read the character
      set from memory for the text output */
   printer_end();

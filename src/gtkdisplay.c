@@ -34,7 +34,6 @@
 #include "display.h"
 #include "fuse.h"
 #include "gtkinternals.h"
-#include "screenshot.h"
 #include "ui/ui.h"
 #include "ui/uidisplay.h"
 #include "settings.h"
@@ -97,11 +96,7 @@ static int display_updated = 0;
 
 #endif                /* #if GTK_CHECK_VERSION( 3, 0, 0 ) */
 
-/* The current size of the window (in units of DISPLAY_SCREEN_*) */
-static int gtkdisplay_current_size=1;
-
 static int init_colours( colour_format_t format );
-static void gtkdisplay_area(int x, int y, int width, int height);
 
 static int
 init_colours( colour_format_t format )
@@ -196,51 +191,8 @@ uidisplay_frame_end( void )
 void
 uidisplay_area( int x, int y, int w, int h )
 {
-  float scale = (float)gtkdisplay_current_size / image_scale;
-  int scaled_x, scaled_y, i, yy;
-  libspectrum_dword *palette;
-
-  /* Extend the dirty region by 1 pixel for scalers
-     that "smear" the screen, e.g. 2xSAI */
-  if( scaler_flags & SCALER_FLAGS_EXPAND )
-    scaler_expander( &x, &y, &w, &h, image_width, image_height );
-
-  scaled_x = scale * x; scaled_y = scale * y;
-
-  palette = settings_current.bw_tv ? bw_colours : gtkdisplay_colours;
-
-  /* Create the RGB image */
-  for( yy = y; yy < y + h; yy++ ) {
-
-    libspectrum_dword *rgb; libspectrum_word *display;
-
-    rgb = (libspectrum_dword*)( rgb_image + ( yy + 2 ) * rgb_pitch );
-    rgb += x + 1;
-
-    display = &gtkdisplay_image[yy][x];
-
-    for( i = 0; i < w; i++, rgb++, display++ ) *rgb = palette[ *display ];
-  }
-
-  /* Create scaled image */
-  /*scaler_proc32( &rgb_image[ ( y + 2 ) * rgb_pitch + 4 * ( x + 1 ) ],
-                 rgb_pitch,
-                 &scaled_image[ scaled_y * scaled_pitch + 4 * scaled_x ],
-                 scaled_pitch, w, h );
-
-  w *= scale; h *= scale;*/
-
-  /* Blit to the real screen */
-  gtkdisplay_area( scaled_x, scaled_y, w, h );
-}
-
-static void gtkdisplay_area(int x, int y, int width, int height)
-{
-	display_updated = 1;
-
-	width = gtk_widget_get_allocated_width(gtkui_window);
-	height = gtk_widget_get_allocated_height(gtkui_window);
-
+	int width = gtk_widget_get_allocated_width(gtkui_window);
+	int height = gtk_widget_get_allocated_height(gtkui_window);
 
 	gtk_widget_queue_draw_area( gtkui_drawing_area, 0, 0, width, height );
 }
