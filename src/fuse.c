@@ -79,7 +79,6 @@
 #include "peripherals/printer.h"
 #include "peripherals/scld.h"
 #include "peripherals/speccyboot.h"
-#include "peripherals/spectranet.h"
 #include "peripherals/ula.h"
 #include "pokefinder/pokemem.h"
 #include "profile.h"
@@ -794,7 +793,6 @@ static int fuse_end(void)
   opus_end();
   plusd_end();
   disciple_end();
-  spectranet_end();
   speccyboot_end();
 
   machine_end();
