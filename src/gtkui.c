@@ -84,17 +84,6 @@ typedef struct gtkui_select_info {
 
 } gtkui_select_info;
 
-static gboolean gtkui_make_menu(GtkAccelGroup **accel_group,
-				GtkWidget **menu_bar,
-				GtkActionEntry *menu_data,
-				guint menu_data_size);
-
-static gboolean gtkui_lose_focus( GtkWidget*, GdkEvent*, gpointer );
-static gboolean gtkui_gain_focus( GtkWidget*, GdkEvent*, gpointer );
-
-static gboolean gtkui_delete( GtkWidget *widget, GdkEvent *event,
-			      gpointer data );
-
 static void menu_options_filter_done( GtkWidget *widget, gpointer user_data );
 static void menu_machine_select_done( GtkWidget *widget, gpointer user_data );
 
@@ -103,110 +92,9 @@ static const GtkTargetEntry drag_types[] =
     { "text/uri-list", GTK_TARGET_OTHER_APP, 0 }
 };
 
-static void gtkui_drag_data_received( GtkWidget *widget GCC_UNUSED,
-                                      GdkDragContext *drag_context,
-                                      gint x GCC_UNUSED, gint y GCC_UNUSED,
-                                      GtkSelectionData *data,
-                                      guint info GCC_UNUSED, guint timestamp )
-{
-  static char uri_prefix[] = "file://";
-  char *filename, *selection_filename;
-  const guchar *selection_data, *data_begin, *data_end, *p;
-  gint selection_length;
-
-  selection_length = gtk_selection_data_get_length( data );
-
-  if ( data && selection_length > (gint) sizeof( uri_prefix ) ) {
-    selection_data = gtk_selection_data_get_data( data );
-    data_begin = selection_data + sizeof( uri_prefix ) - 1;
-    data_end = selection_data + selection_length;
-    p = data_begin; 
-    do {
-      if ( *p == '\r' || *p == '\n' ) {
-        data_end = p;
-        break;
-      }
-    } while ( p++ != data_end );
-
-    selection_filename = g_strndup( (const gchar *)data_begin,
-                                    data_end - data_begin );
-
-    filename = g_uri_unescape_string( selection_filename, NULL );
-    if ( filename ) {
-      fuse_emulation_pause();
-      utils_open_file( filename, settings_current.auto_load, NULL );
-      free( filename );
-      display_refresh_all();
-      fuse_emulation_unpause();
-    }
-
-    g_free( selection_filename );
-  }
-  gtk_drag_finish( drag_context, FALSE, FALSE, timestamp );
-}
-
 #include "tape.h"
 
 extern libspectrum_tape *tape;
-
-static void
-gtkui_menu_deactivate( GtkMenuShell *menu GCC_UNUSED,
-		       gpointer data GCC_UNUSED )
-{
-  ui_mouse_resume();
-}
-
-static gboolean
-gtkui_make_menu(GtkAccelGroup **accel_group,
-                GtkWidget **menu_bar,
-                GtkActionEntry *menu_data,
-                guint menu_data_size)
-{
-  *accel_group = NULL;
-  *menu_bar = NULL;
-  GError *error = NULL;
-  char ui_file[ PATH_MAX ];
-
-  ui_manager_menu = gtk_ui_manager_new();
-
-  /* Load actions */
-  GtkActionGroup *menu_action_group = gtk_action_group_new( "MenuActionGroup" );
-  gtk_action_group_add_actions( menu_action_group, menu_data, menu_data_size,
-                                NULL );
-  gtk_ui_manager_insert_action_group( ui_manager_menu, menu_action_group, 0 );
-  g_object_unref( menu_action_group );
-
-  /* Load the UI */
-  if( utils_find_file_path( "menu_data.ui", ui_file, UTILS_AUXILIARY_GTK ) ) {
-    fprintf( stderr, "%s: Error getting path for menu_data.ui\n",
-                     fuse_progname );
-    return TRUE;
-  }
-
-  guint ui_menu_id = gtk_ui_manager_add_ui_from_file( ui_manager_menu, ui_file,
-                                                      &error );
-  if( error ) {
-    g_error_free( error );
-    return TRUE;
-  }
-  else if( !ui_menu_id ) return TRUE;
-
-  *accel_group = gtk_ui_manager_get_accel_group( ui_manager_menu );
-
-  *menu_bar = gtk_ui_manager_get_widget( ui_manager_menu, "/MainMenu" );
-  g_signal_connect( G_OBJECT( *menu_bar ), "deactivate",
-		    G_CALLBACK( gtkui_menu_deactivate ), NULL );
-
-  /* Start various menus in the 'off' state */
-  ui_menu_activate( UI_MENU_ITEM_AY_LOGGING, 0 );
-  ui_menu_activate( UI_MENU_ITEM_FILE_MOVIE_RECORDING, 0 );
-  ui_menu_activate( UI_MENU_ITEM_MACHINE_PROFILER, 0 );
-  ui_menu_activate( UI_MENU_ITEM_RECORDING, 0 );
-  ui_menu_activate( UI_MENU_ITEM_RECORDING_ROLLBACK, 0 );
-  ui_menu_activate( UI_MENU_ITEM_TAPE_RECORDING, 0 );
-
-  return FALSE;
-}
 
 int
 ui_event(void)
@@ -272,48 +160,6 @@ ui_error_specific( ui_error_level severity, const char *message )
 }
 
 /* The callbacks used by various routines */
-
-static gboolean
-gtkui_lose_focus( GtkWidget *widget GCC_UNUSED,
-		  GdkEvent *event GCC_UNUSED, gpointer data GCC_UNUSED )
-{
-  keyboard_release_all();
-  ui_mouse_suspend();
-  return TRUE;
-}
-
-static gboolean
-gtkui_gain_focus( GtkWidget *widget GCC_UNUSED,
-		  GdkEvent *event GCC_UNUSED, gpointer data GCC_UNUSED )
-{
-  ui_mouse_resume();
-  return TRUE;
-}
-
-/* Called by the main window on a "delete-event" */
-static gboolean
-gtkui_delete( GtkWidget *widget GCC_UNUSED, GdkEvent *event GCC_UNUSED,
-              gpointer data GCC_UNUSED )
-{
-  menu_file_exit( NULL, NULL );
-  return TRUE;
-}
-
-/* Called by the menu when File/Exit selected */
-void
-menu_file_exit( GtkAction *gtk_action GCC_UNUSED, gpointer data GCC_UNUSED )
-{
-  if( gtkui_confirm( "Exit Fuse?" ) ) {
-
-    if( menu_check_media_changed() ) return;
-
-    fuse_exiting = 1;
-
-    /* Stop the paused state to allow us to exit (occurs from main
-       emulation loop) */
-    if( paused ) menu_machine_pause( NULL, NULL );
-  }
-}
 
 /* Select a graphics filter from those for which `available' returns
    true */
