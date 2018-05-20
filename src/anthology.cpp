@@ -99,7 +99,7 @@ class Menu
 			int width = gtk_widget_get_allocated_width(widget);
 			int height = gtk_widget_get_allocated_height(widget);
 
-			/* load image and get dimantions */
+			/* load image and get dimensions */
 			cairo_surface_t *img = cairo_image_surface_create_from_png(imgpath);
 			if (cairo_surface_status(img) != CAIRO_STATUS_SUCCESS)
 			{
