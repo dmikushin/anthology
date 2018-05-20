@@ -9,6 +9,13 @@
 #include <SDL.h>
 #include <vector>
 
+// on 3.12.x the _start and _end versions of these functions were renamed
+// make sure to still support the old names
+#if ! GTK_CHECK_VERSION(3,12,0)
+#define gtk_widget_set_margin_start gtk_widget_set_margin_left
+#define gtk_widget_set_margin_end gtk_widget_set_margin_right
+#endif
+
 extern "C"
 {
 	GtkWidget *gtkui_drawing_area = NULL;
