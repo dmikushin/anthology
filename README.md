@@ -5,9 +5,12 @@ Simplification of ZX Spectrum Fuse emulator with menu and joystick support for p
 <img src="https://github.com/dmikushin/anthology/blob/master/screen.jpg" width="300" />
 
 ```
-$ sudo apt-get install libspectrum-dev libgtk-3-dev libsdl1.2-dev liballegro5-dev
+$ sudo apt-get install gcc cmake spectrum-roms fuse-emulator-common libasound2-dev libspectrum-dev libgtk-3-dev libsdl1.2-dev liballegro5-dev
 $ git clone https://github.com/dmikushin/anthology.git
 $ cd anthology
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make -j48
 $ ./anthology
 ```

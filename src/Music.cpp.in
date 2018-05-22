@@ -1,0 +1,33 @@
+// Embed music into hex array.
+
+#include <cstring>
+#include <map>
+#include <memory>
+#include <vector>
+
+using namespace std;
+
+// Container for embedded music sources.
+extern unique_ptr<map<string, vector<char> > > music_sources;
+
+static unsigned char music_hex[] = { @MUSIC_HEX@ };
+
+class AddMusicSource@MUSIC_CLASS@
+{
+public :
+
+	AddMusicSource@MUSIC_CLASS@()
+	{
+		if (!music_sources.get())
+			music_sources.reset(new map<string, vector<char> >());
+
+		static const string music_name = "@MUSIC_NAME@";
+		
+		vector<char>& music_source = (*music_sources)[music_name];
+		music_source.resize(sizeof(music_hex));
+		memcpy(&music_source[0], (unsigned char*)music_hex, sizeof(music_hex));
+	};
+};
+
+static AddMusicSource@MUSIC_CLASS@ addMusicSource@MUSIC_CLASS@;
+
