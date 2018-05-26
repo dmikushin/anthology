@@ -373,9 +373,6 @@ if1_reset( int hard_reset GCC_UNUSED )
   if1_available = 0;
 
   if( !periph_is_active( PERIPH_TYPE_INTERFACE1 ) ) {
-    ui_statusbar_update( UI_STATUSBAR_ITEM_MICRODRIVE,
-                         UI_STATUSBAR_STATE_NOT_AVAILABLE );
-
     return;
   }
 
@@ -386,9 +383,6 @@ if1_reset( int hard_reset GCC_UNUSED )
 			     0x2000 ) ) {
     settings_current.interface1 = 0;
     periph_activate_type( PERIPH_TYPE_INTERFACE1, 0 );
-
-    ui_statusbar_update( UI_STATUSBAR_ITEM_MICRODRIVE,
-                         UI_STATUSBAR_STATE_NOT_AVAILABLE );
 
     return;
   }
@@ -404,8 +398,6 @@ if1_reset( int hard_reset GCC_UNUSED )
   microdrives_reset();
 
   update_menu( UMENU_ALL );
-  ui_statusbar_update( UI_STATUSBAR_ITEM_MICRODRIVE,
-		       UI_STATUSBAR_STATE_INACTIVE );
 
   if1_mdr_status = 0;
   
@@ -519,8 +511,6 @@ microdrives_reset( void )
     microdrive[m].sync     = 15;
     microdrive[m].transfered = 0;
   }
-  ui_statusbar_update( UI_STATUSBAR_ITEM_MICRODRIVE,
-		       UI_STATUSBAR_STATE_INACTIVE );
   if1_mdr_status = 0;
 /*
   if1_ula.comms_data = 0;
@@ -848,13 +838,9 @@ port_ctr_out( libspectrum_byte val )
 	microdrive[4].motor_on || microdrive[5].motor_on ||
 	microdrive[6].motor_on || microdrive[7].motor_on ) {
       if( !if1_mdr_status ) {
-	ui_statusbar_update( UI_STATUSBAR_ITEM_MICRODRIVE,
-	                     UI_STATUSBAR_STATE_ACTIVE );
 	if1_mdr_status = 1;
       }
     } else if ( if1_mdr_status ) {
-      ui_statusbar_update( UI_STATUSBAR_ITEM_MICRODRIVE,
-			   UI_STATUSBAR_STATE_INACTIVE );
       if1_mdr_status = 0;
     }
   }

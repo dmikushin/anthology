@@ -1,13 +1,33 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_memfile.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <input.h>
 #include <libspectrum.h>
+#include <map>
 #include <memory>
 #include <SDL.h>
 #include <vector>
+
+// on 3.12.x the _start and _end versions of these functions were renamed
+// make sure to still support the old names
+#if ! GTK_CHECK_VERSION(3,12,0)
+#define gtk_widget_set_margin_start gtk_widget_set_margin_left
+#define gtk_widget_set_margin_end gtk_widget_set_margin_right
+#endif
+
+using namespace std;
+
+// Container for embedded music sources.
+unique_ptr<map<string, vector<char> > > music_sources;
+
+// Container for embedded image sources.
+unique_ptr<map<string, vector<char> > > image_sources;
+
+// Container for embedded game sources.
+unique_ptr<map<string, vector<char> > > game_sources;
 
 extern "C"
 {
@@ -16,14 +36,11 @@ extern "C"
 	int is_game_active = FALSE;
 }
 
-using namespace std;
-
 class Music
 {
-	static const char* tracks[2];
-
-	ALLEGRO_SAMPLE* sample;
-	ALLEGRO_SAMPLE_ID sampleId;
+	ALLEGRO_FILE* trackFile;
+	ALLEGRO_SAMPLE* trackSample;
+	ALLEGRO_SAMPLE_ID trackId;
 
 public :
 
@@ -34,47 +51,100 @@ public :
 		if (!al_install_system(ALLEGRO_VERSION_INT, NULL))
 		{
 			fprintf(stderr, "Failed to initialize allegro\n");
-			exit(1);
+			exit(-1);
 		}
 
 		if (!al_install_audio())
 		{
 			fprintf(stderr, "Failed to initialize audio\n");
-			exit(1);
+			exit(-1);
 		}
 
 		if (!al_init_acodec_addon())
 		{
 			fprintf(stderr, "Failed to initialize audio codecs\n");
-			exit(1);
+			exit(-1);
 		}
 
 		if (!al_reserve_samples(1))
 		{
 			fprintf(stderr, "Failed to reserve samples\n");
-			exit(1);
+			exit(-1);
 		}
-	   
-		sample = al_load_sample(tracks[rand() % (sizeof(tracks) / sizeof(tracks[0]))]);
+
+		if (!image_sources.get())
+		{
+			fprintf(stderr, "Image sources list is empty\n");
+			exit(-1);
+		}
+		
+		int ii = 0;
+		const int itrack = rand() % music_sources->size();
+		for (map<string, vector<char> >::iterator i = music_sources->begin(), e = music_sources->end(); i != e; i++)
+		{
+			if (ii != itrack)
+			{
+				ii++;
+				continue;
+			}
+			
+			const string& filename = i->first;
+			vector<char>& track = i->second;
+
+			trackFile = al_open_memfile(&track[0], track.size(), "rb");
+			if (!trackFile)
+			{
+				fprintf(stderr, "Error reading music track #%d \"%s\"\n", itrack, filename.c_str());
+				exit(-1);
+			}
+
+			string::size_type idx = filename.rfind('.');
+			
+			if (idx == string::npos)
+			{
+				fprintf(stderr, "Error determining music track #%d \"%s\" ident\n", itrack, filename.c_str());
+				exit(-1);
+			}
+
+			string ext = filename.substr(idx);
+			
+			trackSample = al_load_sample_f(trackFile, ext.c_str());
+			
+			break;
+		}
 	
-		al_play_sample(sample, 2.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, &sampleId);
+		al_play_sample(trackSample, 2.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, &trackId);
 	}
 	
 	~Music()
 	{
-		al_stop_sample(&sampleId);
-		al_destroy_sample(sample);
+		al_stop_sample(&trackId);
+		al_destroy_sample(trackSample);
+		al_fclose(trackFile);
 		al_uninstall_system();
 	}
 };
 
-const char* Music::tracks[] =
-{
-	"music/evelynn.ogg",
-	"music/adventure.ogg"
-};
-
 unique_ptr<Music> music = NULL;
+
+static cairo_status_t
+stdio_read_func (void *closure, unsigned char *data, unsigned int size)
+{
+    FILE* file = (FILE*)closure;
+
+    while (size) {
+	size_t ret;
+
+	ret = fread (data, 1, size, file);
+	size -= ret;
+	data += ret;
+
+	if (size && (feof (file) || ferror (file)))
+	    return CAIRO_STATUS_READ_ERROR;
+    }
+
+    return CAIRO_STATUS_SUCCESS;
+}
 
 class Menu
 {
@@ -89,7 +159,7 @@ class Menu
 	GtkWidget *gamePool;
 	GtkWidget *gameEmpty;
 
-	static void draw(GtkWidget *widget, const char* imgpath, gboolean frame)
+	static void draw(GtkWidget *widget, const int iimage, gboolean frame)
 	{
 		{
 			cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(GTK_WIDGET(widget)));
@@ -99,23 +169,54 @@ class Menu
 			int width = gtk_widget_get_allocated_width(widget);
 			int height = gtk_widget_get_allocated_height(widget);
 
-			/* load image and get dimantions */
-			cairo_surface_t *img = cairo_image_surface_create_from_png(imgpath);
-			if (cairo_surface_status(img) != CAIRO_STATUS_SUCCESS)
+			if (!image_sources.get())
 			{
-				fprintf(stderr, "Failed to load image %s", imgpath);
-				exit(1);
+				fprintf(stderr, "Image sources list is empty\n");
+				exit(-1);
 			}
-			int imgw = cairo_image_surface_get_width(img);
-			int imgh = cairo_image_surface_get_height(img);
 
-			float scaleX = (float)(width - 20) / imgw;
-			float scaleY = (float)(height - 20) / imgh;
-			cairo_scale(cr, scaleX, scaleY);
-			cairo_set_source_surface(cr, img, 10 / scaleX, 10 / scaleY);
-			cairo_paint(cr);
+			// Load image and get dimensions.
+			int ii = 0;
+			for (map<string, vector<char> >::iterator i = image_sources->begin(), e = image_sources->end(); i != e; i++)
+			{
+				if (ii != iimage)
+				{
+					ii++;
+					continue;
+				}
+			
+				const string& filename = i->first;
+				vector<char>& image = i->second;
+				if (!&image[0])
+				{
+					fprintf(stderr, "Failed to load image \"%s\"\n", filename.c_str());
+					exit(-1);
+				}
+				FILE* imageFile = fmemopen(&image[0], image.size(), "rb");
+				if (!imageFile)
+				{
+					fprintf(stderr, "Failed to load image \"%s\"\n", filename.c_str());
+					exit(-1);
+				}
+				cairo_surface_t *img = cairo_image_surface_create_from_png_stream(stdio_read_func, imageFile);
+				if (cairo_surface_status(img) != CAIRO_STATUS_SUCCESS)
+				{
+					fprintf(stderr, "Failed to load image \"%s\"\n", filename.c_str());
+					exit(-1);
+				}
+				int imgw = cairo_image_surface_get_width(img);
+				int imgh = cairo_image_surface_get_height(img);
 
-			cairo_destroy(cr);
+				float scaleX = (float)(width - 20) / imgw;
+				float scaleY = (float)(height - 20) / imgh;
+				cairo_scale(cr, scaleX, scaleY);
+				cairo_set_source_surface(cr, img, 10 / scaleX, 10 / scaleY);
+				cairo_paint(cr);
+
+				cairo_destroy(cr);
+				
+				break;
+			}
 		}
 
 		if (frame)
@@ -140,7 +241,7 @@ class Menu
 	{
 		int i = *(int*)user_data;
 
-		draw(widget, screens[i], selected_game == i);
+		draw(widget, i, selected_game == i);
 
 		return FALSE;
 	}
@@ -203,7 +304,8 @@ unique_ptr<Menu> menu = NULL;
 extern "C" int machine_init();
 extern "C" void z80_do_opcodes();
 extern "C" int event_do_events();
-extern "C" int utils_open_file(const char *filename, int autoload, void *type);
+extern "C" int tape_read_buffer(unsigned char *buffer, size_t length,
+	libspectrum_id_t type, const char *filename, int autoload);
 extern "C" int gtkkeyboard_keypress(GtkWidget *widget, GdkEvent *event, gpointer data);
 extern "C" int gtkkeyboard_keyrelease(GtkWidget *widget, GdkEvent *event, gpointer data);
 
@@ -223,8 +325,6 @@ class ZX80
 {
 	GtkWidget *window;
 	GtkWidget** gtkui_drawing_area;
-
-	static const char* games[3];
 
 	vector<uint32_t> pixels;
 	int stride;
@@ -318,20 +418,38 @@ public :
 
 		machine_init();
 
-		utils_open_file(games[selected_game], TRUE, NULL);
+		if (!game_sources.get())
+		{
+			fprintf(stderr, "Game sources list is empty\n");
+			exit(-1);
+		}
+
+		int ii = 0;
+		for (map<string, vector<char> >::iterator i = game_sources->begin(), e = game_sources->end(); i != e; i++)
+		{
+			if (ii != selected_game)
+			{
+				ii++;
+				continue;
+			}
+
+			const string& filename = i->first;
+			vector<char>& game = i->second;
+
+			int error = tape_read_buffer((unsigned char*)&game[0], game.size(), LIBSPECTRUM_ID_TAPE_TZX, filename.c_str(), TRUE);
+			if (error)
+			{
+				fprintf(stderr, "Error loading game \"%s\": errno = %d\n", filename.c_str(), error);
+				exit(-1);
+			}
+			break;
+		}
 	}
 	
 	~ZX80()
 	{
 		gtk_container_remove(GTK_CONTAINER(window), *gtkui_drawing_area);
 	}
-};
-
-const char* ZX80::games[3] =
-{
-	"games/chopper/chopper.tzx",
-	"games/3dmoto/3dmoto.tzx",
-	"games/pool/pool.tzx"
 };
 
 struct Keymap

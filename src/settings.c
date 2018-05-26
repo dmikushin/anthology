@@ -191,7 +191,7 @@ settings_info settings_default = {
   /* rom_128_0 */ "128-0.rom",
   /* rom_128_1 */ "128-1.rom",
   /* rom_16 */ "48.rom",
-  /* rom_48 */ "48.rom",
+  /* rom_48 */ "/usr/share/spectrum-roms/48.rom",
   /* rom_beta128 */ "trdos.rom",
   /* rom_disciple */ "disciple.rom",
   /* rom_interface_i */ "if1-2.rom",

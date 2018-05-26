@@ -48,7 +48,6 @@
 #include "peripherals/if2.h"
 #include "pokefinder/pokemem.h"
 #include "rzx.h"
-#include "screenshot.h"
 #include "settings.h"
 #include "snapshot.h"
 #include "tape.h"
@@ -449,13 +448,6 @@ utils_read_screen( const char *filename, utils_file *screen )
   }
 
   if( error ) return error;
-
-  if( screen->length != STANDARD_SCR_SIZE ) {
-    utils_close_file( screen );
-    ui_error( UI_ERROR_ERROR, "screen picture ('%s') is not %d bytes long",
-	      filename, STANDARD_SCR_SIZE );
-    return 1;
-  }
 
   return 0;
 }

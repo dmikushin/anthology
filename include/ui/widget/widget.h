@@ -27,7 +27,6 @@
 #define FUSE_WIDGET_H
 
 #include "input.h"
-#include "ui/scaler/scaler.h"
 #include "ui/ui.h"
 
 /* Code called at start and end of emulation */

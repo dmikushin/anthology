@@ -1,0 +1,33 @@
+// Embed images into hex array.
+
+#include <cstring>
+#include <map>
+#include <memory>
+#include <vector>
+
+using namespace std;
+
+// Container for embedded image sources.
+extern unique_ptr<map<string, vector<char> > > game_sources;
+
+static unsigned char game_hex[] = { @GAME_HEX@ };
+
+class AddGameSource@GAME_CLASS@
+{
+public :
+
+	AddGameSource@GAME_CLASS@()
+	{
+		if (!game_sources.get())
+			game_sources.reset(new map<string, vector<char> >());
+
+		static const string game_name = "@GAME_NAME@";
+		
+		vector<char>& game_source = (*game_sources)[game_name];
+		game_source.resize(sizeof(game_hex));
+		memcpy(&game_source[0], (unsigned char*)game_hex, sizeof(game_hex));
+	};
+};
+
+static AddGameSource@GAME_CLASS@ addGameSource@GAME_CLASS@;
+

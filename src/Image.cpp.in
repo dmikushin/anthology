@@ -1,0 +1,35 @@
+// Embed images into hex array.
+
+#include <cstring>
+#include <map>
+#include <memory>
+#include <vector>
+
+using namespace std;
+
+// Container for embedded image sources.
+extern unique_ptr<map<string, vector<char> > > image_sources;
+
+static unsigned char image_hex[] = { @IMAGE_HEX@ };
+
+class AddImageSource@IMAGE_CLASS@
+{
+public :
+
+	AddImageSource@IMAGE_CLASS@()
+	{
+		if (!image_sources.get())
+			image_sources.reset(new map<string, vector<char> >());
+
+		static const string image_name = "@IMAGE_NAME@";
+		
+		vector<char>& image_source = (*image_sources)[image_name];
+		image_source.resize(sizeof(image_hex));
+		memcpy(&image_source[0], (unsigned char*)image_hex, sizeof(image_hex));
+		
+		printf("Reading image %s\n", image_name.c_str());
+	};
+};
+
+static AddImageSource@IMAGE_CLASS@ addImageSource@IMAGE_CLASS@;
+

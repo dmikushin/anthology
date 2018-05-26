@@ -32,7 +32,6 @@
 
 #include "fuse.h"
 #include "machine.h"
-#include "movie.h"
 #include "options.h"
 #include "settings.h"
 #include "sound.h"
@@ -292,9 +291,6 @@ sound_init( const char *device )
   samples =
     (blip_sample_t *)libspectrum_calloc( sound_framesiz * sound_channels,
                                          sizeof(blip_sample_t) );
-  /* initialize movie settings... */
-  movie_init_sound( settings_current.sound_freq, sound_stereo_ay );
-
 }
 
 void
@@ -668,8 +664,6 @@ sound_frame( void )
   if( settings_current.sound ) 
     sound_lowlevel_frame( samples, count );
 
-  if( movie_recording )
-      movie_add_sound( samples, count );
   ay_change_count = 0;
 }
 

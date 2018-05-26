@@ -178,7 +178,7 @@ tape_autoload( libspectrum_machine hardware )
 
   /* Look for an autoload snap. Try .szx first, then .z80 */
   type = LIBSPECTRUM_ID_SNAPSHOT_SZX;
-  snprintf( filename, sizeof(filename), "tape_%s.szx", id );
+  snprintf( filename, sizeof(filename), "/usr/share/fuse/tape_%s.szx", id );
   error = utils_read_auxiliary_file( filename, &snap, UTILS_AUXILIARY_LIB );
   if( error == -1 ) {
     type = LIBSPECTRUM_ID_SNAPSHOT_Z80;
@@ -621,9 +621,6 @@ tape_play( int autoplay )
   tape_autoplay = autoplay;
   tape_microphone = 0;
 
-  /* Update the status bar */
-  ui_statusbar_update( UI_STATUSBAR_ITEM_TAPE, UI_STATUSBAR_STATE_ACTIVE );
-
   /* If we're fastloading, turn sound off */
   if( settings_current.fastload ) sound_pause();
 
@@ -660,7 +657,6 @@ int tape_stop( void )
   if( tape_playing ) {
 
     tape_playing = 0;
-    ui_statusbar_update( UI_STATUSBAR_ITEM_TAPE, UI_STATUSBAR_STATE_INACTIVE );
     loader_tape_stop();
 
     /* If we were fastloading, sound was off, so turn it back on, and

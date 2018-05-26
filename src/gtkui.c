@@ -42,14 +42,12 @@
 #include "keyboard.h"
 #include "machine.h"
 #include "machines/specplus3.h"
-#include "menu.h"
 #include "peripherals/ide/simpleide.h"
 #include "peripherals/ide/zxatasp.h"
 #include "peripherals/ide/zxcf.h"
 #include "peripherals/joystick.h"
 #include "psg.h"
 #include "rzx.h"
-#include "screenshot.h"
 #include "settings.h"
 #include "snapshot.h"
 #include "timer/timer.h"
@@ -65,9 +63,6 @@ extern GtkWidget *gtkui_drawing_area;
 /* The UIManager used to create the menu bar */
 GtkUIManager *ui_manager_menu = NULL;
 
-/* True if we were paused via the Machine/Pause menu item */
-static int paused = 0;
-
 /* Structure used by the radio button selection widgets (eg the
    graphics filter selectors and Machine/Select) */
 typedef struct gtkui_select_info {
@@ -75,138 +70,19 @@ typedef struct gtkui_select_info {
   GtkWidget *dialog;
   GtkWidget **buttons;
 
-  /* Used by the graphics filter selectors */
-  scaler_available_fn selector;
-  scaler_type selected;
-
   /* Used by the joystick confirmation */
   ui_confirm_joystick_t joystick;
 
 } gtkui_select_info;
-
-static gboolean gtkui_make_menu(GtkAccelGroup **accel_group,
-				GtkWidget **menu_bar,
-				GtkActionEntry *menu_data,
-				guint menu_data_size);
-
-static gboolean gtkui_lose_focus( GtkWidget*, GdkEvent*, gpointer );
-static gboolean gtkui_gain_focus( GtkWidget*, GdkEvent*, gpointer );
-
-static gboolean gtkui_delete( GtkWidget *widget, GdkEvent *event,
-			      gpointer data );
-
-static void menu_options_filter_done( GtkWidget *widget, gpointer user_data );
-static void menu_machine_select_done( GtkWidget *widget, gpointer user_data );
 
 static const GtkTargetEntry drag_types[] =
 {
     { "text/uri-list", GTK_TARGET_OTHER_APP, 0 }
 };
 
-static void gtkui_drag_data_received( GtkWidget *widget GCC_UNUSED,
-                                      GdkDragContext *drag_context,
-                                      gint x GCC_UNUSED, gint y GCC_UNUSED,
-                                      GtkSelectionData *data,
-                                      guint info GCC_UNUSED, guint timestamp )
-{
-  static char uri_prefix[] = "file://";
-  char *filename, *selection_filename;
-  const guchar *selection_data, *data_begin, *data_end, *p;
-  gint selection_length;
-
-  selection_length = gtk_selection_data_get_length( data );
-
-  if ( data && selection_length > (gint) sizeof( uri_prefix ) ) {
-    selection_data = gtk_selection_data_get_data( data );
-    data_begin = selection_data + sizeof( uri_prefix ) - 1;
-    data_end = selection_data + selection_length;
-    p = data_begin; 
-    do {
-      if ( *p == '\r' || *p == '\n' ) {
-        data_end = p;
-        break;
-      }
-    } while ( p++ != data_end );
-
-    selection_filename = g_strndup( (const gchar *)data_begin,
-                                    data_end - data_begin );
-
-    filename = g_uri_unescape_string( selection_filename, NULL );
-    if ( filename ) {
-      fuse_emulation_pause();
-      utils_open_file( filename, settings_current.auto_load, NULL );
-      free( filename );
-      display_refresh_all();
-      fuse_emulation_unpause();
-    }
-
-    g_free( selection_filename );
-  }
-  gtk_drag_finish( drag_context, FALSE, FALSE, timestamp );
-}
-
 #include "tape.h"
 
 extern libspectrum_tape *tape;
-
-static void
-gtkui_menu_deactivate( GtkMenuShell *menu GCC_UNUSED,
-		       gpointer data GCC_UNUSED )
-{
-  ui_mouse_resume();
-}
-
-static gboolean
-gtkui_make_menu(GtkAccelGroup **accel_group,
-                GtkWidget **menu_bar,
-                GtkActionEntry *menu_data,
-                guint menu_data_size)
-{
-  *accel_group = NULL;
-  *menu_bar = NULL;
-  GError *error = NULL;
-  char ui_file[ PATH_MAX ];
-
-  ui_manager_menu = gtk_ui_manager_new();
-
-  /* Load actions */
-  GtkActionGroup *menu_action_group = gtk_action_group_new( "MenuActionGroup" );
-  gtk_action_group_add_actions( menu_action_group, menu_data, menu_data_size,
-                                NULL );
-  gtk_ui_manager_insert_action_group( ui_manager_menu, menu_action_group, 0 );
-  g_object_unref( menu_action_group );
-
-  /* Load the UI */
-  if( utils_find_file_path( "menu_data.ui", ui_file, UTILS_AUXILIARY_GTK ) ) {
-    fprintf( stderr, "%s: Error getting path for menu_data.ui\n",
-                     fuse_progname );
-    return TRUE;
-  }
-
-  guint ui_menu_id = gtk_ui_manager_add_ui_from_file( ui_manager_menu, ui_file,
-                                                      &error );
-  if( error ) {
-    g_error_free( error );
-    return TRUE;
-  }
-  else if( !ui_menu_id ) return TRUE;
-
-  *accel_group = gtk_ui_manager_get_accel_group( ui_manager_menu );
-
-  *menu_bar = gtk_ui_manager_get_widget( ui_manager_menu, "/MainMenu" );
-  g_signal_connect( G_OBJECT( *menu_bar ), "deactivate",
-		    G_CALLBACK( gtkui_menu_deactivate ), NULL );
-
-  /* Start various menus in the 'off' state */
-  ui_menu_activate( UI_MENU_ITEM_AY_LOGGING, 0 );
-  ui_menu_activate( UI_MENU_ITEM_FILE_MOVIE_RECORDING, 0 );
-  ui_menu_activate( UI_MENU_ITEM_MACHINE_PROFILER, 0 );
-  ui_menu_activate( UI_MENU_ITEM_RECORDING, 0 );
-  ui_menu_activate( UI_MENU_ITEM_RECORDING_ROLLBACK, 0 );
-  ui_menu_activate( UI_MENU_ITEM_TAPE_RECORDING, 0 );
-
-  return FALSE;
-}
 
 int
 ui_event(void)
@@ -272,278 +148,6 @@ ui_error_specific( ui_error_level severity, const char *message )
 }
 
 /* The callbacks used by various routines */
-
-static gboolean
-gtkui_lose_focus( GtkWidget *widget GCC_UNUSED,
-		  GdkEvent *event GCC_UNUSED, gpointer data GCC_UNUSED )
-{
-  keyboard_release_all();
-  ui_mouse_suspend();
-  return TRUE;
-}
-
-static gboolean
-gtkui_gain_focus( GtkWidget *widget GCC_UNUSED,
-		  GdkEvent *event GCC_UNUSED, gpointer data GCC_UNUSED )
-{
-  ui_mouse_resume();
-  return TRUE;
-}
-
-/* Called by the main window on a "delete-event" */
-static gboolean
-gtkui_delete( GtkWidget *widget GCC_UNUSED, GdkEvent *event GCC_UNUSED,
-              gpointer data GCC_UNUSED )
-{
-  menu_file_exit( NULL, NULL );
-  return TRUE;
-}
-
-/* Called by the menu when File/Exit selected */
-void
-menu_file_exit( GtkAction *gtk_action GCC_UNUSED, gpointer data GCC_UNUSED )
-{
-  if( gtkui_confirm( "Exit Fuse?" ) ) {
-
-    if( menu_check_media_changed() ) return;
-
-    fuse_exiting = 1;
-
-    /* Stop the paused state to allow us to exit (occurs from main
-       emulation loop) */
-    if( paused ) menu_machine_pause( NULL, NULL );
-  }
-}
-
-/* Select a graphics filter from those for which `available' returns
-   true */
-scaler_type
-menu_get_scaler( scaler_available_fn selector )
-{
-  GtkWidget *content_area;
-  gtkui_select_info dialog;
-  GSList *button_group = NULL;
-
-  int count;
-  scaler_type scaler;
-
-  /* Store the function which tells us which scalers are currently
-     available */
-  dialog.selector = selector;
-
-  /* No scaler currently selected */
-  dialog.selected = SCALER_NUM;
-
-  /* Some space to store the radio buttons in */
-  dialog.buttons = malloc( SCALER_NUM * sizeof(GtkWidget* ) );
-  if( dialog.buttons == NULL ) {
-    ui_error( UI_ERROR_ERROR, "out of memory at %s:%d", __FILE__, __LINE__ );
-    return SCALER_NUM;
-  }
-
-  count = 0;
-
-  /* Create the necessary widgets */
-  dialog.dialog = gtkstock_dialog_new( "Fuse - Select Scaler", NULL );
-  content_area = gtk_dialog_get_content_area( GTK_DIALOG( dialog.dialog ) );
-
-  for( scaler = 0; scaler < SCALER_NUM; scaler++ ) {
-
-    if( !selector( scaler ) ) continue;
-
-    dialog.buttons[ count ] =
-      gtk_radio_button_new_with_label( button_group, scaler_name( scaler ) );
-    button_group =
-      gtk_radio_button_get_group( GTK_RADIO_BUTTON( dialog.buttons[ count ] ) );
-
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dialog.buttons[ count ] ),
-				  current_scaler == scaler );
-
-    gtk_container_add( GTK_CONTAINER( content_area ), dialog.buttons[ count ] );
-
-    count++;
-  }
-
-  /* Create and add the actions buttons to the dialog box */
-  gtkstock_create_ok_cancel( dialog.dialog, NULL,
-                             G_CALLBACK( menu_options_filter_done ),
-                             (gpointer) &dialog, DEFAULT_DESTROY,
-                             DEFAULT_DESTROY );
-
-  gtk_widget_show_all( dialog.dialog );
-
-  /* Process events until the window is done with */
-  gtk_main();
-
-  return dialog.selected;
-}
-
-/* Callback used by the filter selection dialog */
-static void
-menu_options_filter_done( GtkWidget *widget GCC_UNUSED, gpointer user_data )
-{
-  int i, count;
-  gtkui_select_info *ptr = (gtkui_select_info*)user_data;
-
-  count = 0;
-
-  for( i = 0; i < SCALER_NUM; i++ ) {
-
-    if( !ptr->selector( i ) ) continue;
-
-    if( gtk_toggle_button_get_active(
-	  GTK_TOGGLE_BUTTON( ptr->buttons[ count ] )
-	)
-      ) {
-      ptr->selected = i;
-    }
-
-    count++;
-  }
-
-  gtk_widget_destroy( ptr->dialog );
-  gtk_main_quit();
-}
-
-static gboolean
-gtkui_run_main_loop( gpointer user_data GCC_UNUSED )
-{
-  gtk_main();
-  return FALSE;
-}
-
-/* Machine/Pause */
-void
-menu_machine_pause( GtkAction *gtk_action GCC_UNUSED, gpointer data GCC_UNUSED )
-{
-  int error;
-
-  if( paused ) {
-    paused = 0;
-    ui_statusbar_update( UI_STATUSBAR_ITEM_PAUSED,
-			 UI_STATUSBAR_STATE_INACTIVE );
-    timer_estimate_reset();
-    gtk_main_quit();
-  } else {
-
-    /* Stop recording any competition mode RZX file */
-    if( rzx_recording && rzx_competition_mode ) {
-      ui_error( UI_ERROR_INFO, "Stopping competition mode RZX recording" );
-      error = rzx_stop_recording(); if( error ) return;
-    }
-
-    paused = 1;
-    ui_statusbar_update( UI_STATUSBAR_ITEM_PAUSED, UI_STATUSBAR_STATE_ACTIVE );
-
-    /* Create nested main loop outside this callback to allow unpause */
-    g_idle_add( (GSourceFunc)gtkui_run_main_loop, NULL );
-  }
-
-}
-
-/* Called by the menu when Machine/Reset selected */
-void
-menu_machine_reset( GtkAction *gtk_action GCC_UNUSED, guint action )
-{
-  int hard_reset = action;
-  const char *message = "Reset?";
-
-  if( hard_reset )
-    message = "Hard reset?";
-
-  if( gtkui_confirm( message ) && machine_reset( hard_reset ) ) {
-    ui_error( UI_ERROR_ERROR, "couldn't reset machine: giving up!" );
-
-    /* FIXME: abort() seems a bit extreme here, but it'll do for now */
-    fuse_abort();
-  }
-}
-
-/* Called by the menu when Machine/Select selected */
-void
-menu_machine_select( GtkAction *gtk_action GCC_UNUSED,
-                     gpointer data GCC_UNUSED )
-{
-  GtkWidget *content_area;
-  gtkui_select_info dialog;
-
-  int i;
-
-  /* Some space to store the radio buttons in */
-  dialog.buttons = malloc( machine_count * sizeof(GtkWidget* ) );
-  if( dialog.buttons == NULL ) {
-    ui_error( UI_ERROR_ERROR, "out of memory at %s:%d", __FILE__, __LINE__ );
-    return;
-  }
-
-  /* Stop emulation */
-  fuse_emulation_pause();
-
-  /* Create the necessary widgets */
-  dialog.dialog = gtkstock_dialog_new( "Fuse - Select Machine", NULL );
-  content_area = gtk_dialog_get_content_area( GTK_DIALOG( dialog.dialog ) );
-
-  dialog.buttons[0] =
-    gtk_radio_button_new_with_label(
-      NULL, libspectrum_machine_name( machine_types[0]->machine )
-    );
-
-  for( i=1; i<machine_count; i++ ) {
-    dialog.buttons[i] =
-      gtk_radio_button_new_with_label(
-        gtk_radio_button_get_group( GTK_RADIO_BUTTON( dialog.buttons[i-1] ) ),
-	libspectrum_machine_name( machine_types[i]->machine )
-      );
-  }
-
-  for( i=0; i<machine_count; i++ ) {
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( dialog.buttons[i] ),
-				  machine_current == machine_types[i] );
-    gtk_container_add( GTK_CONTAINER( content_area ), dialog.buttons[i] );
-  }
-
-  /* Create and add the actions buttons to the dialog box */
-  gtkstock_create_ok_cancel( dialog.dialog, NULL,
-                             G_CALLBACK( menu_machine_select_done ),
-                             (gpointer) &dialog, DEFAULT_DESTROY,
-                             DEFAULT_DESTROY );
-
-  gtk_widget_show_all( dialog.dialog );
-
-  /* Process events until the window is done with */
-  gtk_main();
-
-  /* And then carry on with emulation again */
-  fuse_emulation_unpause();
-}
-
-/* Callback used by the machine selection dialog */
-static void
-menu_machine_select_done( GtkWidget *widget GCC_UNUSED, gpointer user_data )
-{
-  int i;
-  gtkui_select_info *ptr = user_data;
-
-  for( i=0; i<machine_count; i++ ) {
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(ptr->buttons[i]) ) &&
-        machine_current != machine_types[i]
-      )
-    {
-      machine_select( machine_types[i]->machine );
-    }
-  }
-
-  gtk_widget_destroy( ptr->dialog );
-  gtk_main_quit();
-}
-
-void
-menu_machine_debugger( GtkAction *gtk_action GCC_UNUSED,
-                       gpointer data GCC_UNUSED )
-{
-  debugger_mode = DEBUGGER_MODE_HALTED;
-  if( paused ) ui_debugger_activate();
-}
 
 /* Called on machine selection */
 int

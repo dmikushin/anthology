@@ -26,7 +26,6 @@
 #include <config.h>
 
 #include "event.h"
-#include "movie.h"
 #include "settings.h"
 #include "sound.h"
 #include "tape.h"
@@ -82,8 +81,6 @@ timer_estimate_speed( void )
     current_speed = 10 * 100 /
                       ( current_time - stored_times[ next_stored_time ] );
   }
-
-  ui_statusbar_update_speed( current_speed );
 
   stored_times[ next_stored_time ] = current_time;
 

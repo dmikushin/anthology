@@ -40,7 +40,6 @@
 #include "peripherals/disk/disciple.h"
 #include "peripherals/disk/opus.h"
 #include "peripherals/disk/plusd.h"
-#include "ui/scaler/scaler.h"
 
 /* The various severities of error level, increasing downwards */
 typedef enum ui_error_level {
@@ -234,29 +233,6 @@ int ui_menu_activate( ui_menu_item item, int active );
 int ui_menu_item_set_active( const char *path, int active );
 
 void ui_menu_disk_update( void );
-
-/* Functions to update the statusbar */
-
-typedef enum ui_statusbar_item {
-
-  UI_STATUSBAR_ITEM_DISK,
-  UI_STATUSBAR_ITEM_MICRODRIVE,
-  UI_STATUSBAR_ITEM_MOUSE,
-  UI_STATUSBAR_ITEM_PAUSED,
-  UI_STATUSBAR_ITEM_TAPE,
-
-} ui_statusbar_item;
-
-typedef enum ui_statusbar_state {
-
-  UI_STATUSBAR_STATE_NOT_AVAILABLE,
-  UI_STATUSBAR_STATE_INACTIVE,
-  UI_STATUSBAR_STATE_ACTIVE,
-
-} ui_statusbar_state;
-
-int ui_statusbar_update( ui_statusbar_item item, ui_statusbar_state state );
-int ui_statusbar_update_speed( float speed );
 
 typedef enum ui_tape_browser_update_type {
 
