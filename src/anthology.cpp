@@ -262,15 +262,15 @@ public :
 		gtk_widget_set_margin_top(grid,20);
 		gtk_widget_set_margin_bottom(grid,20);
 
-		// Chopper game.
-		gameChopper = gtk_drawing_area_new();
-		gtk_grid_attach(GTK_GRID(grid), gameChopper, 0, 0, 1, 1);
-		g_signal_connect(G_OBJECT(gameChopper), "draw", G_CALLBACK(on_draw_event), &indexes[0]);
-
 		// Moto game.
 		gameMoto = gtk_drawing_area_new();
-		gtk_grid_attach(GTK_GRID(grid), gameMoto, 1, 0, 1, 1);
-		g_signal_connect(G_OBJECT(gameMoto), "draw", G_CALLBACK(on_draw_event), &indexes[1]);
+		gtk_grid_attach(GTK_GRID(grid), gameMoto, 0, 0, 1, 1);
+		g_signal_connect(G_OBJECT(gameMoto), "draw", G_CALLBACK(on_draw_event), &indexes[0]);
+
+		// Chopper game.
+		gameChopper = gtk_drawing_area_new();
+		gtk_grid_attach(GTK_GRID(grid), gameChopper, 1, 0, 1, 1);
+		g_signal_connect(G_OBJECT(gameChopper), "draw", G_CALLBACK(on_draw_event), &indexes[1]);
 
 		// Pool game.
 		gamePool = gtk_drawing_area_new();
@@ -294,8 +294,8 @@ int Menu::indexes[3] = { 0, 1, 2 };
 
 const char* Menu::screens[3] =
 {
-	"games/chopper/chopper.png",
 	"games/3dmoto/3dmoto.png",
+	"games/chopper/chopper.png",
 	"games/pool/pool.png"
 };
 
@@ -463,6 +463,15 @@ extern "C"
 	Keymap joystick[4][127] =
 	{
 		{
+			{ INPUT_JOYSTICK_LEFT, INPUT_KEY_1 },
+			{ INPUT_JOYSTICK_RIGHT, INPUT_KEY_0 },
+			{ 0, INPUT_KEY_minus },
+			{ INPUT_JOYSTICK_DOWN, INPUT_KEY_8 },
+			{ INPUT_JOYSTICK_UP, INPUT_KEY_9 },
+			{ 3, INPUT_KEY_1 },
+			{ 8, INPUT_KEY_Escape },
+		},
+		{
 			{ INPUT_JOYSTICK_LEFT, INPUT_KEY_o },
 			{ INPUT_JOYSTICK_RIGHT, INPUT_KEY_p },
 			{ 0, INPUT_KEY_m },
@@ -470,15 +479,6 @@ extern "C"
 			{ INPUT_JOYSTICK_DOWN, INPUT_KEY_a },
 			{ INPUT_JOYSTICK_UP, INPUT_KEY_q },
 			{ 3, INPUT_KEY_s },
-			{ 8, INPUT_KEY_Escape },
-		},
-		{
-			{ INPUT_JOYSTICK_LEFT, INPUT_KEY_1 },
-			{ INPUT_JOYSTICK_RIGHT, INPUT_KEY_0 },
-			{ 0, INPUT_KEY_minus },
-			{ INPUT_JOYSTICK_DOWN, INPUT_KEY_8 },
-			{ INPUT_JOYSTICK_UP, INPUT_KEY_9 },
-			{ 3, INPUT_KEY_1 },
 			{ 8, INPUT_KEY_Escape },
 		},
 		{
