@@ -77,7 +77,6 @@
 #include "peripherals/melodik.h"
 #include "peripherals/printer.h"
 #include "peripherals/scld.h"
-#include "peripherals/speccyboot.h"
 #include "peripherals/ula.h"
 #include "pokefinder/pokemem.h"
 #include "profile.h"
@@ -245,7 +244,6 @@ int machine_init( void )
   kempmouse_init();
   fuller_init();
   melodik_init();
-  speccyboot_init();
   specdrum_init();
   //spectranet_init();
   machines_periph_init();
@@ -786,7 +784,6 @@ static int fuse_end(void)
   opus_end();
   plusd_end();
   disciple_end();
-  speccyboot_end();
 
   machine_end();
 

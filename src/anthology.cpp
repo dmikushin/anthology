@@ -9,6 +9,7 @@
 #include <map>
 #include <memory>
 #include <SDL.h>
+#include <string>
 #include <vector>
 
 // on 3.12.x the _start and _end versions of these functions were renamed
