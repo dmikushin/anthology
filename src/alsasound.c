@@ -23,7 +23,9 @@
 
 /* This is necessary to prevent warnings from the calls to
    snd_pcm_[hs]w_params_alloca() */
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -35,7 +37,9 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
+#if 0
 #include <alsa/asoundlib.h>
+#endif
 
 #include "settings.h"
 #include "sfifo.h"
@@ -46,26 +50,30 @@
 /* Number of Spectrum frames audio latency to use */
 #define NUM_FRAMES 3
 
+#if 0
 static snd_pcm_t *pcm_handle;
 static snd_pcm_stream_t stream = SND_PCM_STREAM_PLAYBACK;
+static snd_pcm_uframes_t exact_periodsize, exact_bsize;
+static snd_output_t *output = NULL;
+#endif
 static int ch, framesize;
 static const char *pcm_name = NULL;
 static int verb = 0;
-static snd_pcm_uframes_t exact_periodsize, exact_bsize;
-
-static snd_output_t *output = NULL;
 
 void
 sound_lowlevel_end( void )
 {
+#if 0
 /* Stop PCM device and drop pending frames */
   snd_pcm_drop( pcm_handle );
   snd_pcm_close( pcm_handle );
+#endif
 }
 
 int
 sound_lowlevel_init( const char *device, int *freqptr, int *stereoptr )
 {
+#if 0
   unsigned int exact_rate, periods;
   unsigned int val, n;
   snd_pcm_hw_params_t *hw_params;
@@ -357,6 +365,7 @@ sound_lowlevel_init( const char *device, int *freqptr, int *stereoptr )
 
   first_init = 0;
   init_running = 0;
+#endif
   return 0;	/* success */
 }
 
@@ -365,6 +374,7 @@ sound_lowlevel_init( const char *device, int *freqptr, int *stereoptr )
 void
 sound_lowlevel_frame( libspectrum_signed_word *data, int len )
 {
+#if 0
   int ret = 0;
   len /= ch;	/* now in frames */
 
@@ -387,4 +397,5 @@ sound_lowlevel_frame( libspectrum_signed_word *data, int len )
         len -= ret;
     }
   }
+#endif
 }
