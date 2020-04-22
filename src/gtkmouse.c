@@ -32,14 +32,17 @@
 #include "ui/ui.h"
 
 /* For XWarpPointer *only* - see below */
+#if 0
 #include <gdk/gdkx.h>
 #include <X11/Xlib.h>
+#endif
 
 static GdkCursor *nullpointer = NULL;
 
 static void
 gtkmouse_reset_pointer( void )
 {
+#if 0
   /* Ugh. GDK doesn't have its own move-pointer function :-|
    * Framebuffer users and win32 users will have to make their own
    * arrangements here.
@@ -51,6 +54,7 @@ gtkmouse_reset_pointer( void )
 
   XWarpPointer( GDK_WINDOW_XDISPLAY( window ), None, 
                 GDK_WINDOW_XID( window ), 0, 0, 0, 0, 128, 128 );
+#endif
 }
 
 gboolean
